@@ -17,7 +17,7 @@ import {
 } from 'react-native-paper';
 import { useTheme, withOpacity } from '../utils/theme';
 import { useAppContext } from '../context/AppContext';
-import { AIMessage, UserMessage } from '../types';
+import { AIMessage } from '../types';
 import AIPartnerService from '../services/AIPartnerService';
 import 'react-native-get-random-values';
 import { v4 as uuidv4 } from 'uuid';
@@ -33,7 +33,7 @@ const ChatScreen: React.FC = () => {
     addMessage
   } = useAppContext();
   
-  const [messages, setMessages] = useState<(AIMessage | UserMessage)[]>([]);
+  const [messages, setMessages] = useState<AIMessage[]>([]);
   const [inputText, setInputText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   
@@ -43,6 +43,7 @@ const ChatScreen: React.FC = () => {
   // Initialize chat with welcome message if no conversation exists
   useEffect(() => {
     if (conversation && conversation.length > 0) {
+      // Use existing conversation
       setMessages(conversation);
     } else {
       // Generate welcome message
@@ -51,7 +52,7 @@ const ChatScreen: React.FC = () => {
       // Add to global conversation
       addMessage(welcomeMessage);
     }
-  }, [conversation]);
+  }, []);
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -66,12 +67,12 @@ const ChatScreen: React.FC = () => {
   const handleSendMessage = () => {
     if (!inputText.trim()) return;
     
-    // Create user message
-    const userMessage: UserMessage = {
+    // Create user message as AIMessage with isUser: true to ensure correct positioning
+    const userMessage: AIMessage = {
       id: uuidv4(),
       content: inputText.trim(),
       timestamp: new Date().toISOString(),
-      read: true
+      isUser: true
     };
     
     // Add user message to state
@@ -83,27 +84,12 @@ const ChatScreen: React.FC = () => {
     
     // Generate AI response after a delay
     setTimeout(() => {
-      // Convert UserMessage to AIMessage for the response generation
-      const messageForAI = {
-        id: userMessage.id,
-        content: userMessage.content,
-        timestamp: userMessage.timestamp,
-        isUser: true
-      };
-      
-      const aiResponse = AIPartnerService.generateResponse(messageForAI, habits);
+      const aiResponse = AIPartnerService.generateResponse(userMessage, habits);
       setMessages(prevMessages => [...prevMessages, aiResponse]);
       setIsTyping(false);
       
       // Add messages to global conversation
-      const aiMessageForContext: AIMessage = {
-        id: userMessage.id,
-        content: userMessage.content,
-        timestamp: userMessage.timestamp,
-        isUser: true
-      };
-      
-      addMessage(aiMessageForContext);
+      addMessage(userMessage);
       addMessage(aiResponse);
       
       // Update user's virtual currency as a reward for engaging
@@ -118,8 +104,9 @@ const ChatScreen: React.FC = () => {
   };
 
   // Render a message bubble
-  const renderMessage = ({ item }: { item: AIMessage | UserMessage }) => {
-    const isAI = 'isUser' in item ? !item.isUser : 'read' in item;
+  const renderMessage = ({ item }: { item: AIMessage }) => {
+    // Determine if the message is from AI or user
+    const isAI = !item.isUser;
     
     return (
       <View 
