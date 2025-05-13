@@ -33,6 +33,15 @@ export interface AIMessage {
   isUser: boolean;
 }
 
+// Define settings type
+export interface Settings {
+  theme: 'light' | 'dark';
+  notificationsEnabled: boolean;
+  soundEnabled: boolean;
+  vibrationEnabled: boolean;
+  reminderTime: string;
+}
+
 interface AppContextType {
   isFirstLaunch: boolean;
   setIsFirstLaunch: (value: boolean) => void;
@@ -60,6 +69,8 @@ interface AppContextType {
   addCheckIn: (checkIn: CheckIn) => void;
   conversation: AIMessage[];
   addMessage: (message: AIMessage) => void;
+  settings: Settings;
+  updateSettings: (settings: Partial<Settings>) => void;
 }
 
 const defaultContext: AppContextType = {
@@ -84,6 +95,14 @@ const defaultContext: AppContextType = {
   addCheckIn: () => {},
   conversation: [],
   addMessage: () => {},
+  settings: {
+    theme: 'light',
+    notificationsEnabled: true,
+    soundEnabled: true,
+    vibrationEnabled: true,
+    reminderTime: '09:00',
+  },
+  updateSettings: () => {},
 };
 
 const AppContext = createContext<AppContextType>(defaultContext);
@@ -116,6 +135,13 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [habits, setHabits] = useState<Habit[]>([]);
   const [checkIns, setCheckIns] = useState<CheckIn[]>([]);
   const [conversation, setConversation] = useState<AIMessage[]>([]);
+  const [settings, setSettings] = useState<Settings>({
+    theme: 'light',
+    notificationsEnabled: true,
+    soundEnabled: true,
+    vibrationEnabled: true,
+    reminderTime: '09:00',
+  });
 
   // Register for push notifications
   useEffect(() => {
@@ -235,6 +261,17 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
           setConversation(JSON.parse(conversationData));
         }
         
+        // Load settings
+        const settingsData = await AsyncStorage.getItem('settings');
+        if (settingsData) {
+          const loadedSettings = JSON.parse(settingsData);
+          setSettings(loadedSettings);
+          // Sync isDarkMode with settings theme
+          if (loadedSettings.theme === 'dark') {
+            setIsDarkMode(true);
+          }
+        }
+        
         setIsLoading(false);
       } catch (error) {
         console.error('Error loading initial data:', error);
@@ -340,6 +377,21 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       saveConversation();
     }
   }, [conversation, isLoading]);
+  
+  // Save settings when they change
+  useEffect(() => {
+    const saveSettings = async () => {
+      try {
+        await AsyncStorage.setItem('settings', JSON.stringify(settings));
+      } catch (error) {
+        console.error('Error saving settings:', error);
+      }
+    };
+    
+    if (!isLoading) {
+      saveSettings();
+    }
+  }, [settings, isLoading]);
 
   // Toggle theme and save preference
   const toggleTheme = async () => {
@@ -347,6 +399,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       const newMode = !isDarkMode;
       setIsDarkMode(newMode);
       await AsyncStorage.setItem('isDarkMode', JSON.stringify(newMode));
+      // Also update the settings theme
+      updateSettings({ theme: newMode ? 'dark' : 'light' });
     } catch (error) {
       console.error('Error toggling theme:', error);
     }
@@ -400,6 +454,11 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   // Add a new message to the conversation
   const addMessage = (message: AIMessage) => {
     setConversation(prev => [...prev, message]);
+  };
+  
+  // Update settings
+  const updateSettings = (newSettings: Partial<Settings>) => {
+    setSettings(prev => ({ ...prev, ...newSettings }));
   };
   
   // Schedule a local notification with the latest options
@@ -472,6 +531,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         addCheckIn,
         conversation,
         addMessage,
+        settings,
+        updateSettings,
       }}
     >
       {!isLoading && children}
