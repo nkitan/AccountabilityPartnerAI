@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="300" height="300" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+  <rect width="300" height="300" fill="#f0f0f0"/>
+  <rect x="75" y="75" width="150" height="150" fill="#03dac6"/>
+  <text x="150" y="160" font-family="Arial" font-size="24" text-anchor="middle" fill="white">Goals</text>
+</svg>

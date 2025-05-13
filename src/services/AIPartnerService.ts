@@ -1,4 +1,5 @@
 import { Habit, CheckIn, AIMessage, UserMessage } from '../types';
+import 'react-native-get-random-values'; // This must be imported before uuid
 import { v4 as uuidv4 } from 'uuid';
 
 // This is a mock AI service that simulates AI responses
