@@ -9,7 +9,8 @@ import {
   Animated 
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme, Button } from 'react-native-paper';
+import { Button } from 'react-native-paper';
+import { useTheme } from '../utils/theme';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types';

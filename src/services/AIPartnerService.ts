@@ -1,4 +1,5 @@
-import { Habit, CheckIn, AIMessage, UserMessage } from '../types';
+import { Habit, AIMessage } from '../types';
+import { CheckIn } from '../context/AppContext';
 import 'react-native-get-random-values'; // This must be imported before uuid
 import { v4 as uuidv4 } from 'uuid';
 
@@ -19,13 +20,12 @@ class AIPartnerService {
       id: uuidv4(),
       content: welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)],
       timestamp: new Date().toISOString(),
-      type: 'encouragement',
-      read: false
+      isUser: false
     };
   }
 
   // Generate a response to a user message
-  generateResponse(userMessage: UserMessage, habits: Habit[]): AIMessage {
+  generateResponse(userMessage: AIMessage, habits: Habit[]): AIMessage {
     // Simple keyword-based response system
     const lowerCaseMessage = userMessage.content.toLowerCase();
     
@@ -51,8 +51,7 @@ class AIPartnerService {
         id: uuidv4(),
         content: genericResponses[Math.floor(Math.random() * genericResponses.length)],
         timestamp: new Date().toISOString(),
-        type: 'feedback',
-        read: false
+        isUser: false
       };
     }
   }
@@ -70,9 +69,7 @@ class AIPartnerService {
       id: uuidv4(),
       content: reminderMessages[Math.floor(Math.random() * reminderMessages.length)],
       timestamp: new Date().toISOString(),
-      type: 'reminder',
-      read: false,
-      relatedHabitId: habit.id
+      isUser: false
     };
   }
 
@@ -99,8 +96,7 @@ class AIPartnerService {
       id: uuidv4(),
       content: message,
       timestamp: new Date().toISOString(),
-      type: 'encouragement',
-      read: false
+      isUser: false
     };
   }
 
@@ -129,9 +125,7 @@ class AIPartnerService {
       id: uuidv4(),
       content: message,
       timestamp: new Date().toISOString(),
-      type: 'celebration',
-      read: false,
-      relatedHabitId: recentlyCompletedHabit?.id
+      isUser: false
     };
   }
 
@@ -158,9 +152,7 @@ class AIPartnerService {
       id: uuidv4(),
       content: message,
       timestamp: new Date().toISOString(),
-      type: 'feedback',
-      read: false,
-      relatedHabitId: habit.id
+      isUser: false
     };
   }
 
@@ -191,8 +183,7 @@ class AIPartnerService {
       id: uuidv4(),
       content: message,
       timestamp: new Date().toISOString(),
-      type: 'challenge',
-      read: false
+      isUser: false
     };
   }
 
@@ -212,8 +203,7 @@ class AIPartnerService {
       id: uuidv4(),
       content: adviceMessages[Math.floor(Math.random() * adviceMessages.length)],
       timestamp: new Date().toISOString(),
-      type: 'feedback',
-      read: false
+      isUser: false
     };
   }
 
@@ -230,8 +220,7 @@ class AIPartnerService {
       id: uuidv4(),
       content: goalMessages[Math.floor(Math.random() * goalMessages.length)],
       timestamp: new Date().toISOString(),
-      type: 'feedback',
-      read: false
+      isUser: false
     };
   }
 
@@ -305,8 +294,7 @@ class AIPartnerService {
       id: uuidv4(),
       content: message,
       timestamp: new Date().toISOString(),
-      type: 'feedback',
-      read: false
+      isUser: false
     };
   }
 }

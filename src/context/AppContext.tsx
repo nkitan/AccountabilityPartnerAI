@@ -4,7 +4,7 @@ import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 import 'react-native-get-random-values'; // This must be imported before uuid
 import { v4 as uuidv4 } from 'uuid';
-import { User } from '../types';
+import { User, Habit } from '../types';
 
 // Define notification type
 export interface Notification {
@@ -14,6 +14,23 @@ export interface Notification {
   timestamp: string;
   read: boolean;
   type: 'reminder' | 'streak' | 'achievement' | 'message' | 'system';
+}
+
+// Define check-in type
+export interface CheckIn {
+  id: string;
+  habitId: string;
+  date: string;
+  completed: boolean;
+  createdAt: string;
+}
+
+// Define AI message type
+export interface AIMessage {
+  id: string;
+  content: string;
+  timestamp: string;
+  isUser: boolean;
 }
 
 interface AppContextType {
@@ -34,6 +51,15 @@ interface AppContextType {
     trigger: Notifications.NotificationTriggerInput,
     type?: Notification['type']
   ) => Promise<string | null>;
+  // Added missing properties
+  habits: Habit[];
+  addHabit: (habit: Habit) => void;
+  updateHabit: (habit: Habit) => void;
+  deleteHabit: (id: string) => void;
+  checkIns: CheckIn[];
+  addCheckIn: (checkIn: CheckIn) => void;
+  conversation: AIMessage[];
+  addMessage: (message: AIMessage) => void;
 }
 
 const defaultContext: AppContextType = {
@@ -49,6 +75,15 @@ const defaultContext: AppContextType = {
   clearNotifications: () => {},
   expoPushToken: '',
   scheduleNotification: async () => null,
+  // Added missing properties with default values
+  habits: [],
+  addHabit: () => {},
+  updateHabit: () => {},
+  deleteHabit: () => {},
+  checkIns: [],
+  addCheckIn: () => {},
+  conversation: [],
+  addMessage: () => {},
 };
 
 const AppContext = createContext<AppContextType>(defaultContext);
@@ -77,6 +112,10 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [expoPushToken, setExpoPushToken] = useState<string>('');
+  // Added missing state
+  const [habits, setHabits] = useState<Habit[]>([]);
+  const [checkIns, setCheckIns] = useState<CheckIn[]>([]);
+  const [conversation, setConversation] = useState<AIMessage[]>([]);
 
   // Register for push notifications
   useEffect(() => {
@@ -99,8 +138,9 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         }
         
         // Get the token using the latest API
+        // For development, we'll use a dummy projectId
         const tokenData = await Notifications.getExpoPushTokenAsync({
-          projectId: 'accountability-partner-ai', // Replace with your actual Expo project ID if different
+          projectId: 'your-expo-project-id', // Replace with your actual project ID in production
         });
         
         setExpoPushToken(tokenData.data);
@@ -142,7 +182,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     
     // Clean up listeners on unmount
     return () => {
-      Notifications.removeNotificationSubscription(notificationListener);
+      notificationListener.remove();
     };
   }, []);
 
@@ -175,6 +215,24 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         const notificationsData = await AsyncStorage.getItem('notifications');
         if (notificationsData) {
           setNotifications(JSON.parse(notificationsData));
+        }
+        
+        // Load habits
+        const habitsData = await AsyncStorage.getItem('habits');
+        if (habitsData) {
+          setHabits(JSON.parse(habitsData));
+        }
+        
+        // Load check-ins
+        const checkInsData = await AsyncStorage.getItem('checkIns');
+        if (checkInsData) {
+          setCheckIns(JSON.parse(checkInsData));
+        }
+        
+        // Load conversation
+        const conversationData = await AsyncStorage.getItem('conversation');
+        if (conversationData) {
+          setConversation(JSON.parse(conversationData));
         }
         
         setIsLoading(false);
@@ -237,6 +295,51 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       saveNotifications();
     }
   }, [notifications, isLoading]);
+  
+  // Save habits when they change
+  useEffect(() => {
+    const saveHabits = async () => {
+      try {
+        await AsyncStorage.setItem('habits', JSON.stringify(habits));
+      } catch (error) {
+        console.error('Error saving habits:', error);
+      }
+    };
+    
+    if (!isLoading) {
+      saveHabits();
+    }
+  }, [habits, isLoading]);
+  
+  // Save check-ins when they change
+  useEffect(() => {
+    const saveCheckIns = async () => {
+      try {
+        await AsyncStorage.setItem('checkIns', JSON.stringify(checkIns));
+      } catch (error) {
+        console.error('Error saving check-ins:', error);
+      }
+    };
+    
+    if (!isLoading) {
+      saveCheckIns();
+    }
+  }, [checkIns, isLoading]);
+  
+  // Save conversation when it changes
+  useEffect(() => {
+    const saveConversation = async () => {
+      try {
+        await AsyncStorage.setItem('conversation', JSON.stringify(conversation));
+      } catch (error) {
+        console.error('Error saving conversation:', error);
+      }
+    };
+    
+    if (!isLoading) {
+      saveConversation();
+    }
+  }, [conversation, isLoading]);
 
   // Toggle theme and save preference
   const toggleTheme = async () => {
@@ -268,6 +371,35 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   // Clear all notifications
   const clearNotifications = () => {
     setNotifications([]);
+  };
+  
+  // Add a new habit
+  const addHabit = (habit: Habit) => {
+    setHabits(prev => [...prev, habit]);
+  };
+  
+  // Update an existing habit
+  const updateHabit = (updatedHabit: Habit) => {
+    setHabits(prev => 
+      prev.map(habit => 
+        habit.id === updatedHabit.id ? updatedHabit : habit
+      )
+    );
+  };
+  
+  // Delete a habit
+  const deleteHabit = (id: string) => {
+    setHabits(prev => prev.filter(habit => habit.id !== id));
+  };
+  
+  // Add a new check-in
+  const addCheckIn = (checkIn: CheckIn) => {
+    setCheckIns(prev => [...prev, checkIn]);
+  };
+  
+  // Add a new message to the conversation
+  const addMessage = (message: AIMessage) => {
+    setConversation(prev => [...prev, message]);
   };
   
   // Schedule a local notification with the latest options
@@ -331,6 +463,15 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         clearNotifications,
         expoPushToken,
         scheduleNotification,
+        // Added missing properties and functions
+        habits,
+        addHabit,
+        updateHabit,
+        deleteHabit,
+        checkIns,
+        addCheckIn,
+        conversation,
+        addMessage,
       }}
     >
       {!isLoading && children}

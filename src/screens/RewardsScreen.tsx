@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, View, ScrollView, FlatList } from 'react-native';
-import { useTheme, Text, Title, Card, Paragraph, Button, Avatar } from 'react-native-paper';
+import { Text, Title, Card, Paragraph, Button, Avatar } from 'react-native-paper';
+import { useTheme } from '../utils/theme';
 import { useNavigation } from '@react-navigation/native';
 import { useAppContext } from '../context/AppContext';
 import { Ionicons } from '@expo/vector-icons';

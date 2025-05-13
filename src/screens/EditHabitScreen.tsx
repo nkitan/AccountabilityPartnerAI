@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, View, ScrollView } from 'react-native';
-import { useTheme, Text, Title, Button } from 'react-native-paper';
+import { Text, Title, Button } from 'react-native-paper';
+import { useTheme } from '../utils/theme';
 import { useRoute, RouteProp, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types';

@@ -9,13 +9,13 @@ import {
   TextInput as RNTextInput
 } from 'react-native';
 import { 
-  useTheme, 
   Text, 
   Avatar, 
   IconButton, 
   Surface,
   ActivityIndicator
 } from 'react-native-paper';
+import { useTheme, withOpacity } from '../utils/theme';
 import { useAppContext } from '../context/AppContext';
 import { AIMessage, UserMessage } from '../types';
 import AIPartnerService from '../services/AIPartnerService';
@@ -29,7 +29,8 @@ const ChatScreen: React.FC = () => {
     user, 
     habits, 
     conversation, 
-    setUser 
+    setUser,
+    addMessage
   } = useAppContext();
   
   const [messages, setMessages] = useState<(AIMessage | UserMessage)[]>([]);
@@ -41,12 +42,14 @@ const ChatScreen: React.FC = () => {
 
   // Initialize chat with welcome message if no conversation exists
   useEffect(() => {
-    if (conversation && conversation.messages.length > 0) {
-      setMessages(conversation.messages);
+    if (conversation && conversation.length > 0) {
+      setMessages(conversation);
     } else {
       // Generate welcome message
       const welcomeMessage = AIPartnerService.generateWelcomeMessage();
       setMessages([welcomeMessage]);
+      // Add to global conversation
+      addMessage(welcomeMessage);
     }
   }, [conversation]);
 
@@ -80,9 +83,28 @@ const ChatScreen: React.FC = () => {
     
     // Generate AI response after a delay
     setTimeout(() => {
-      const aiResponse = AIPartnerService.generateResponse(userMessage, habits);
+      // Convert UserMessage to AIMessage for the response generation
+      const messageForAI = {
+        id: userMessage.id,
+        content: userMessage.content,
+        timestamp: userMessage.timestamp,
+        isUser: true
+      };
+      
+      const aiResponse = AIPartnerService.generateResponse(messageForAI, habits);
       setMessages(prevMessages => [...prevMessages, aiResponse]);
       setIsTyping(false);
+      
+      // Add messages to global conversation
+      const aiMessageForContext: AIMessage = {
+        id: userMessage.id,
+        content: userMessage.content,
+        timestamp: userMessage.timestamp,
+        isUser: true
+      };
+      
+      addMessage(aiMessageForContext);
+      addMessage(aiResponse);
       
       // Update user's virtual currency as a reward for engaging
       if (user) {
@@ -97,7 +119,7 @@ const ChatScreen: React.FC = () => {
 
   // Render a message bubble
   const renderMessage = ({ item }: { item: AIMessage | UserMessage }) => {
-    const isAI = 'type' in item;
+    const isAI = 'isUser' in item ? !item.isUser : 'read' in item;
     
     return (
       <View 
@@ -120,7 +142,7 @@ const ChatScreen: React.FC = () => {
           style={[
             styles.messageBubble,
             isAI 
-              ? [styles.aiMessageBubble, { backgroundColor: theme.colors.primary + '15' }]
+              ? [styles.aiMessageBubble, { backgroundColor: 'rgba(103, 80, 164, 0.1)' }]
               : [styles.userMessageBubble, { backgroundColor: theme.colors.primary }]
           ]}
         >
@@ -175,7 +197,7 @@ const ChatScreen: React.FC = () => {
           style={[
             styles.messageBubble,
             styles.aiMessageBubble,
-            { backgroundColor: theme.colors.primary + '15' }
+            { backgroundColor: 'rgba(103, 80, 164, 0.1)' }
           ]}
         >
           <View style={styles.typingContainer}>
@@ -257,7 +279,7 @@ const ChatScreen: React.FC = () => {
           <IconButton
             icon="send"
             size={24}
-            iconColor="#fff"
+            color="#fff"
           />
         </TouchableOpacity>
       </Surface>

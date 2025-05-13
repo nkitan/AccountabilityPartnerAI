@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, View, ScrollView } from 'react-native';
-import { useTheme, Text, Title, List, Switch, Divider, Button } from 'react-native-paper';
+import { Text, Title, List, Switch, Divider, Button } from 'react-native-paper';
+import { useTheme } from '../utils/theme';
 import { useNavigation } from '@react-navigation/native';
 import { useAppContext } from '../context/AppContext';
 

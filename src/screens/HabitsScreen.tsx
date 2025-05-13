@@ -7,7 +7,6 @@ import {
   RefreshControl
 } from 'react-native';
 import { 
-  useTheme, 
   Text, 
   Card, 
   Title, 
@@ -19,6 +18,7 @@ import {
   Menu,
   Divider
 } from 'react-native-paper';
+import { useTheme, withOpacity } from '../utils/theme';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList, Habit, HabitCategory } from '../types';
@@ -184,14 +184,14 @@ const HabitsScreen: React.FC = () => {
           
           <View style={styles.habitMeta}>
             <Chip 
-              style={[styles.categoryTag, { backgroundColor: theme.colors.primary + '20' }]}
+              style={[styles.categoryTag, { backgroundColor: 'rgba(103, 80, 164, 0.2)' }]}
               textStyle={{ color: theme.colors.primary }}
             >
               {item.category}
             </Chip>
             
             <Chip 
-              style={[styles.frequencyTag, { backgroundColor: theme.colors.secondary + '20' }]}
+              style={[styles.frequencyTag, { backgroundColor: 'rgba(3, 218, 198, 0.2)' }]}
               textStyle={{ color: theme.colors.secondary }}
             >
               {item.frequency}
@@ -208,7 +208,7 @@ const HabitsScreen: React.FC = () => {
             
             {isCompletedToday && (
               <Chip 
-                style={[styles.completedTag, { backgroundColor: theme.colors.success + '20' }]}
+                style={[styles.completedTag, { backgroundColor: 'rgba(76, 175, 80, 0.2)' }]}
                 textStyle={{ color: theme.colors.success }}
                 icon="check"
               >
@@ -255,7 +255,7 @@ const HabitsScreen: React.FC = () => {
         onChangeText={onChangeSearch}
         value={searchQuery}
         style={[styles.searchBar, { backgroundColor: theme.colors.surface }]}
-        iconColor={theme.colors.primary}
+        theme={{ colors: { primary: theme.colors.primary } }}
         inputStyle={{ color: theme.colors.text }}
         placeholderTextColor={theme.colors.placeholder}
       />

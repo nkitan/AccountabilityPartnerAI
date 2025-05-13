@@ -47,10 +47,34 @@ export interface Habit {
   title: string;
   description: string;
   category: string;
-  frequency: string[];
+  frequency: string;
+  startDate: string;
   reminderTime?: string;
   createdAt: string;
   updatedAt: string;
-  streak: number;
+  streakCount: number;
+  longestStreak: number;
   completedDates: string[];
+  active: boolean;
+  color?: string;
+}
+
+/**
+ * AI Message type definition
+ */
+export interface AIMessage {
+  id: string;
+  content: string;
+  timestamp: string;
+  isUser: boolean;
+}
+
+/**
+ * User Message type definition
+ */
+export interface UserMessage {
+  id: string;
+  content: string;
+  timestamp: string;
+  read: boolean;
 }

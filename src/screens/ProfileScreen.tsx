@@ -7,17 +7,15 @@ import {
   Image
 } from 'react-native';
 import { 
-  useTheme, 
   Text, 
   Card, 
-  Title, 
-  Paragraph, 
   Button, 
   Avatar, 
   Divider,
   List,
   Switch
 } from 'react-native-paper';
+import { useTheme } from '../utils/theme';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types';
@@ -78,23 +76,23 @@ const ProfileScreen: React.FC = () => {
           label={user?.name?.substring(0, 2).toUpperCase() || 'U'} 
           backgroundColor={theme.colors.primary}
         />
-        <Title style={[styles.userName, { color: theme.colors.text }]}>
+        <Text variant="headlineMedium" style={[styles.userName, { color: theme.colors.text }]}>
           {user?.name || 'User'}
-        </Title>
-        <Paragraph style={[styles.joinDate, { color: theme.colors.placeholder }]}>
+        </Text>
+        <Text variant="bodyMedium" style={[styles.joinDate, { color: theme.colors.placeholder }]}>
           Member since {user?.joinedDate 
             ? new Date(user.joinedDate).toLocaleDateString('en-US', { 
                 month: 'long', 
                 year: 'numeric' 
               }) 
             : 'Today'}
-        </Paragraph>
+        </Text>
       </View>
       
       {/* Stats card */}
       <Card style={[styles.statsCard, { backgroundColor: theme.colors.surface }]}>
         <Card.Content>
-          <Title style={{ color: theme.colors.text }}>Your Stats</Title>
+          <Text variant="titleLarge" style={{ color: theme.colors.text }}>Your Stats</Text>
           
           <View style={styles.statsGrid}>
             <View style={styles.statItem}>
@@ -160,7 +158,7 @@ const ProfileScreen: React.FC = () => {
       {/* Settings */}
       <Card style={[styles.settingsCard, { backgroundColor: theme.colors.surface }]}>
         <Card.Content>
-          <Title style={{ color: theme.colors.text }}>Settings</Title>
+          <Text variant="titleLarge" style={{ color: theme.colors.text }}>Settings</Text>
           
           <List.Item
             title="Dark Theme"
@@ -223,12 +221,12 @@ const ProfileScreen: React.FC = () => {
       {/* About section */}
       <Card style={[styles.aboutCard, { backgroundColor: theme.colors.surface }]}>
         <Card.Content>
-          <Title style={{ color: theme.colors.text }}>About</Title>
+          <Text variant="titleLarge" style={{ color: theme.colors.text }}>About</Text>
           
-          <Paragraph style={[styles.aboutText, { color: theme.colors.text }]}>
+          <Text variant="bodyMedium" style={[styles.aboutText, { color: theme.colors.text }]}>
             Your AI Accountability Partner is designed to help you build better habits through consistent tracking, 
             personalized feedback, and a reward system that keeps you motivated.
-          </Paragraph>
+          </Text>
           
           <View style={styles.versionContainer}>
             <Text style={[styles.versionText, { color: theme.colors.placeholder }]}>
