@@ -477,73 +477,194 @@ const StatisticsScreen: React.FC = () => {
                     label: 'Pie'
                   },
                 ]}
+                style={{
+                  backgroundColor: theme.colors.background + '30',
+                  borderRadius: 16,
+                  padding: 3,
+                  borderWidth: 1,
+                  borderColor: theme.colors.outline + '20',
+                }}
+                theme={{
+                  colors: {
+                    primary: theme.colors.primary,
+                    secondaryContainer: theme.colors.surface + '90',
+                    onSecondaryContainer: theme.colors.text,
+                    outline: 'transparent',
+                  }
+                }}
+                density={-2}
               />
             </View>
             
-            <Divider style={{ marginVertical: 12 }} />
+            <Divider style={{ 
+              marginVertical: 12, 
+              opacity: 0.5, 
+              height: 1,
+              backgroundColor: theme.colors.outline + '40'
+            }} />
             
             {Object.keys(categoryDistribution).length > 0 ? (
               categoryChartType === 'bar' ? (
-                <View style={styles.chartContainer}>
+                <View style={[styles.chartContainer, {
+                  backgroundColor: theme.colors.surface + '80',
+                  shadowColor: theme.colors.shadow,
+                }]}>
                   <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                     <BarChart
-                      data={categoryBarData}
-                      barWidth={30}
-                      spacing={24}
+                      data={categoryBarData.map(item => ({
+                        ...item,
+                        frontColor: theme.colors.primary + 'CC',
+                        gradientColor: theme.colors.primary + '40',
+                        label: item.label.length > 10 ? item.label.substring(0, 8) + '...' : item.label,
+                        labelComponent: () => (
+                          <Text 
+                            style={{ 
+                              color: theme.colors.text, 
+                              fontSize: 10, 
+                              textAlign: 'center',
+                              width: 60,
+                              marginTop: 4
+                            }}
+                            numberOfLines={1}
+                            ellipsizeMode="tail"
+                          >
+                            {item.label}
+                          </Text>
+                        )
+                      }))}
+                      barWidth={35}
+                      spacing={20}
                       roundedTop
-                      roundedBottom
                       hideRules
-                      xAxisThickness={1}
-                      yAxisThickness={1}
-                      xAxisColor={theme.colors.outline}
-                      yAxisColor={theme.colors.outline}
-                      yAxisTextStyle={{ color: theme.colors.text }}
-                      xAxisLabelTextStyle={{ color: theme.colors.text, textAlign: 'center' }}
-                      noOfSections={5}
+                      xAxisThickness={0}
+                      yAxisThickness={0}
+                      yAxisTextStyle={{ color: theme.colors.text + '80', fontSize: 10, fontWeight: '400' }}
+                      noOfSections={4}
                       maxValue={Math.max(...Object.values(categoryDistribution)) + 1}
-                      labelWidth={80}
-                      backgroundColor={theme.colors.surface}
+                      labelWidth={60}
+                      backgroundColor={'transparent'}
                       height={200}
-                      width={Math.max(300, Object.keys(categoryDistribution).length * 70)}
-                      showFractionalValues
+                      width={Math.max(300, Object.keys(categoryDistribution).length * 60)}
                       showGradient
-                      gradientColor={theme.colors.background}
+                      barBorderRadius={6}
+                      disableScroll
+                      barMarginBottom={20}
+                      showYAxisIndices={false}
+                      cappedBars
+                      capColor={theme.colors.primary}
+                      capThickness={2}
+                      renderTooltip={(item, index) => {
+                        return (
+                          <View style={{
+                            backgroundColor: theme.colors.surface,
+                            padding: 8,
+                            borderRadius: 8,
+                            elevation: 4,
+                            shadowColor: theme.colors.shadow,
+                            shadowOffset: { width: 0, height: 2 },
+                            shadowOpacity: 0.2,
+                            shadowRadius: 4,
+                            borderWidth: 1,
+                            borderColor: theme.colors.outline + '30',
+                          }}>
+                            <Text style={{ color: theme.colors.text, fontWeight: 'bold' }}>
+                              {item.label}: {item.value}
+                            </Text>
+                            <Text style={{ color: theme.colors.onSurfaceVariant, fontSize: 12 }}>
+                              {((item.value / totalCategoryCount) * 100).toFixed(1)}%
+                            </Text>
+                          </View>
+                        );
+                      }}
                     />
                   </ScrollView>
                 </View>
               ) : (
-                <View style={styles.chartContainer}>
+                <View style={[styles.chartContainer, {
+                  backgroundColor: theme.colors.surface + '80',
+                  shadowColor: theme.colors.shadow,
+                }]}>
                   <PieChart
-                    data={categoryPieData}
+                    data={categoryPieData.map(item => ({
+                      ...item,
+                      color: getCategoryColor(item.label) + 'E6',
+                      gradientCenterColor: getCategoryColor(item.label) + '80',
+                      focused: false,
+                    }))}
                     donut
                     showGradient
-                    sectionAutoFocus
                     radius={90}
-                    innerRadius={60}
-                    innerCircleColor={theme.colors.background}
+                    innerRadius={65}
+                    innerCircleColor={theme.colors.surface}
+                    focusOnPress
+                    strokeWidth={0}
+                    showText={false}
                     centerLabelComponent={() => (
-                      <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-                        <Text style={{ color: theme.colors.text, fontSize: 22, fontWeight: 'bold' }}>
+                      <View style={{ 
+                        alignItems: 'center', 
+                        justifyContent: 'center',
+                        backgroundColor: theme.colors.surface,
+                        borderRadius: 65,
+                        width: 130,
+                        height: 130,
+                        shadowColor: theme.colors.shadow,
+                        shadowOffset: { width: 0, height: 1 },
+                        shadowOpacity: 0.1,
+                        shadowRadius: 2,
+                        elevation: 1,
+                      }}>
+                        <Text style={{ color: theme.colors.primary, fontSize: 32, fontWeight: 'bold' }}>
                           {totalCategoryCount}
                         </Text>
-                        <Text style={{ color: theme.colors.onSurfaceVariant, fontSize: 12 }}>
-                          Total
+                        <Text style={{ color: theme.colors.onSurfaceVariant, fontSize: 12, marginTop: -4 }}>
+                          Total Habits
                         </Text>
                       </View>
                     )}
                   />
                   
                   <View style={styles.legendContainer}>
-                    {Object.entries(categoryDistribution)
-                      .sort(([, countA], [, countB]) => countB - countA) // Sort by count descending
-                      .map(([category, count]) => (
-                        <View key={category} style={styles.legendItem}>
-                          <View style={[styles.legendDot, { backgroundColor: getCategoryColor(category) }]} />
-                          <Text style={[styles.legendText, { color: theme.colors.text }]}>
-                            {category} ({count}) - {((count / totalCategoryCount) * 100).toFixed(1)}%
-                          </Text>
-                        </View>
-                    ))}
+                    <View style={{ 
+                      flexDirection: 'row', 
+                      flexWrap: 'wrap', 
+                      justifyContent: 'space-between',
+                      marginTop: 10
+                    }}>
+                      {Object.entries(categoryDistribution)
+                        .sort(([, countA], [, countB]) => countB - countA) // Sort by count descending
+                        .map(([category, count]) => (
+                          <View key={category} style={{
+                            width: '48%',
+                            marginBottom: 12,
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                          }}>
+                            <View style={{
+                              width: 12,
+                              height: 12,
+                              borderRadius: 6,
+                              backgroundColor: getCategoryColor(category),
+                              marginRight: 8,
+                            }} />
+                            <View style={{ flex: 1 }}>
+                              <Text style={{ 
+                                color: theme.colors.text,
+                                fontSize: 12,
+                                fontWeight: '600',
+                                marginBottom: 2,
+                              }} numberOfLines={1} ellipsizeMode="tail">
+                                {category}
+                              </Text>
+                              <Text style={{ 
+                                color: theme.colors.onSurfaceVariant,
+                                fontSize: 10,
+                              }}>
+                                {count} ({((count / totalCategoryCount) * 100).toFixed(0)}%)
+                              </Text>
+                            </View>
+                          </View>
+                      ))}
+                    </View>
                   </View>
                 </View>
               )
@@ -592,79 +713,213 @@ const StatisticsScreen: React.FC = () => {
                     label: 'Pie'
                   },
                 ]}
+                style={{
+                  backgroundColor: theme.colors.background + '30',
+                  borderRadius: 16,
+                  padding: 3,
+                  borderWidth: 1,
+                  borderColor: theme.colors.outline + '20',
+                }}
+                theme={{
+                  colors: {
+                    primary: theme.colors.primary,
+                    secondaryContainer: theme.colors.surface + '90',
+                    onSecondaryContainer: theme.colors.text,
+                    outline: 'transparent',
+                  }
+                }}
+                density={-2}
               />
             </View>
             
-            <Divider style={{ marginVertical: 12 }} />
+            <Divider style={{ 
+              marginVertical: 12, 
+              opacity: 0.5, 
+              height: 1,
+              backgroundColor: theme.colors.outline + '40'
+            }} />
             
             {Object.keys(priorityDistribution).length > 0 ? (
               priorityChartType === 'bar' ? (
-                <View style={styles.chartContainer}>
+                <View style={[styles.chartContainer, {
+                  backgroundColor: theme.colors.surface + '80',
+                  shadowColor: theme.colors.shadow,
+                }]}>
                   <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                     <BarChart
-                      data={priorityBarData}
-                      barWidth={30}
-                      spacing={24}
+                      data={priorityBarData.map(item => {
+                        const color = getPriorityColor(item.label.toLowerCase());
+                        return {
+                          ...item,
+                          frontColor: color + 'CC',
+                          gradientColor: color + '40',
+                          labelComponent: () => (
+                            <View style={{ alignItems: 'center', marginTop: 4 }}>
+                              <Ionicons 
+                                name={getPriorityIcon(item.label.toLowerCase())} 
+                                size={14} 
+                                color={color} 
+                                style={{ marginBottom: 2 }}
+                              />
+                              <Text 
+                                style={{ 
+                                  color: theme.colors.text, 
+                                  fontSize: 10, 
+                                  textAlign: 'center',
+                                  width: 60
+                                }}
+                              >
+                                {item.label}
+                              </Text>
+                            </View>
+                          )
+                        };
+                      })}
+                      barWidth={35}
+                      spacing={20}
                       roundedTop
-                      roundedBottom
                       hideRules
-                      xAxisThickness={1}
-                      yAxisThickness={1}
-                      xAxisColor={theme.colors.outline}
-                      yAxisColor={theme.colors.outline}
-                      yAxisTextStyle={{ color: theme.colors.text }}
-                      xAxisLabelTextStyle={{ color: theme.colors.text, textAlign: 'center' }}
-                      noOfSections={5}
+                      xAxisThickness={0}
+                      yAxisThickness={0}
+                      yAxisTextStyle={{ color: theme.colors.text + '80', fontSize: 10, fontWeight: '400' }}
+                      noOfSections={4}
                       maxValue={Math.max(...Object.values(priorityDistribution)) + 1}
-                      labelWidth={80}
-                      backgroundColor={theme.colors.surface}
+                      labelWidth={60}
+                      backgroundColor={'transparent'}
                       height={200}
-                      width={Math.max(300, Object.keys(priorityDistribution).length * 70)}
-                      showFractionalValues
+                      width={Math.max(300, Object.keys(priorityDistribution).length * 60)}
                       showGradient
-                      gradientColor={theme.colors.background}
+                      barBorderRadius={6}
+                      disableScroll
+                      barMarginBottom={20}
+                      showYAxisIndices={false}
+                      cappedBars
+                      capThickness={2}
+                      renderTooltip={(item, index) => {
+                        return (
+                          <View style={{
+                            backgroundColor: theme.colors.surface,
+                            padding: 8,
+                            borderRadius: 8,
+                            elevation: 4,
+                            shadowColor: theme.colors.shadow,
+                            shadowOffset: { width: 0, height: 2 },
+                            shadowOpacity: 0.2,
+                            shadowRadius: 4,
+                            borderWidth: 1,
+                            borderColor: theme.colors.outline + '30',
+                          }}>
+                            <Text style={{ color: theme.colors.text, fontWeight: 'bold' }}>
+                              {item.label}: {item.value}
+                            </Text>
+                            <Text style={{ color: theme.colors.onSurfaceVariant, fontSize: 12 }}>
+                              {((item.value / totalPriorityCount) * 100).toFixed(1)}%
+                            </Text>
+                          </View>
+                        );
+                      }}
                     />
                   </ScrollView>
                 </View>
               ) : (
-                <View style={styles.chartContainer}>
+                <View style={[styles.chartContainer, {
+                  backgroundColor: theme.colors.surface + '80',
+                  shadowColor: theme.colors.shadow,
+                }]}>
                   <PieChart
-                    data={priorityPieData}
+                    data={priorityPieData.map(item => ({
+                      ...item,
+                      color: getPriorityColor(item.label.toLowerCase()) + 'E6',
+                      gradientCenterColor: getPriorityColor(item.label.toLowerCase()) + '80',
+                      focused: false,
+                    }))}
                     donut
                     showGradient
-                    sectionAutoFocus
                     radius={90}
-                    innerRadius={60}
-                    innerCircleColor={theme.colors.background}
+                    innerRadius={65}
+                    innerCircleColor={theme.colors.surface}
+                    focusOnPress
+                    strokeWidth={0}
+                    showText={false}
                     centerLabelComponent={() => (
-                      <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-                        <Text style={{ color: theme.colors.text, fontSize: 22, fontWeight: 'bold' }}>
+                      <View style={{ 
+                        alignItems: 'center', 
+                        justifyContent: 'center',
+                        backgroundColor: theme.colors.surface,
+                        borderRadius: 65,
+                        width: 130,
+                        height: 130,
+                        shadowColor: theme.colors.shadow,
+                        shadowOffset: { width: 0, height: 1 },
+                        shadowOpacity: 0.1,
+                        shadowRadius: 2,
+                        elevation: 1,
+                      }}>
+                        <Text style={{ color: theme.colors.primary, fontSize: 32, fontWeight: 'bold' }}>
                           {totalPriorityCount}
                         </Text>
-                        <Text style={{ color: theme.colors.onSurfaceVariant, fontSize: 12 }}>
-                          Total
+                        <Text style={{ color: theme.colors.onSurfaceVariant, fontSize: 12, marginTop: -4 }}>
+                          Total Habits
                         </Text>
                       </View>
                     )}
                   />
                   
                   <View style={styles.legendContainer}>
-                    {Object.entries(priorityDistribution)
-                      .sort(([, countA], [, countB]) => countB - countA) // Sort by count descending
-                      .map(([priority, count]) => (
-                        <View key={priority} style={styles.legendItem}>
-                          <View style={styles.legendItemIcon}>
-                            <Ionicons 
-                              name={getPriorityIcon(priority)} 
-                              size={16} 
-                              color={getPriorityColor(priority)} 
-                            />
+                    <View style={{ 
+                      flexDirection: 'row', 
+                      flexWrap: 'wrap', 
+                      justifyContent: 'space-between',
+                      marginTop: 10
+                    }}>
+                      {Object.entries(priorityDistribution)
+                        .sort(([, countA], [, countB]) => countB - countA) // Sort by count descending
+                        .map(([priority, count]) => (
+                          <View key={priority} style={{
+                            width: '48%',
+                            marginBottom: 12,
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                          }}>
+                            <View style={{
+                              width: 24,
+                              height: 24,
+                              borderRadius: 12,
+                              backgroundColor: theme.colors.surface,
+                              justifyContent: 'center',
+                              alignItems: 'center',
+                              marginRight: 8,
+                              shadowColor: getPriorityColor(priority),
+                              shadowOffset: { width: 0, height: 1 },
+                              shadowOpacity: 0.2,
+                              shadowRadius: 2,
+                              elevation: 1,
+                            }}>
+                              <Ionicons 
+                                name={getPriorityIcon(priority)} 
+                                size={14} 
+                                color={getPriorityColor(priority)} 
+                              />
+                            </View>
+                            <View style={{ flex: 1 }}>
+                              <Text style={{ 
+                                color: theme.colors.text,
+                                fontSize: 12,
+                                fontWeight: '600',
+                                marginBottom: 2,
+                              }}>
+                                {priority.charAt(0).toUpperCase() + priority.slice(1)}
+                              </Text>
+                              <Text style={{ 
+                                color: theme.colors.onSurfaceVariant,
+                                fontSize: 10,
+                              }}>
+                                {count} ({((count / totalPriorityCount) * 100).toFixed(0)}%)
+                              </Text>
+                            </View>
                           </View>
-                          <Text style={[styles.legendText, { color: theme.colors.text }]}>
-                            {priority.charAt(0).toUpperCase() + priority.slice(1)} ({count}) - {((count / totalPriorityCount) * 100).toFixed(1)}%
-                          </Text>
-                        </View>
-                    ))}
+                      ))}
+                    </View>
                   </View>
                 </View>
               )
@@ -882,17 +1137,27 @@ const styles = StyleSheet.create({
   chartTypeSelector: {
     marginTop: 12,
     marginBottom: 8,
+    borderRadius: 16,
+    overflow: 'hidden',
+    alignSelf: 'center',
+    width: '80%',
   },
   // Chart container
   chartContainer: {
     marginVertical: 16,
     alignItems: 'center',
-    paddingHorizontal: 8,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+    padding: 16,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
+    elevation: 1,
   },
   // Legend styles
   legendContainer: {
     width: '100%',
-    paddingHorizontal: 16,
+    paddingHorizontal: 4,
     marginTop: 16,
   },
   legendItem: {
