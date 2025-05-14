@@ -11,7 +11,7 @@ import { v4 as uuidv4 } from 'uuid';
 const RewardsScreen: React.FC = () => {
   const theme = useTheme();
   const navigation = useNavigation();
-  const { user, rewards, addReward, claimReward } = useAppContext();
+  const { user, rewards = [], addReward, claimReward } = useAppContext();
   
   // Add a sample reward (for demo purposes)
   const addSampleReward = () => {

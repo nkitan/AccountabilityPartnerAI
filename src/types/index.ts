@@ -78,3 +78,18 @@ export interface UserMessage {
   timestamp: string;
   read: boolean;
 }
+
+/**
+ * Reward type definition
+ */
+export interface Reward {
+  id: string;
+  title: string;
+  description: string;
+  cost: number;
+  icon: string;
+  unlocked: boolean;
+  claimed: boolean;
+  unlockedAt: string;
+  category: 'achievement' | 'purchase' | 'milestone';
+}

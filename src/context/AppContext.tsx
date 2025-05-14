@@ -4,7 +4,7 @@ import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 import 'react-native-get-random-values'; // This must be imported before uuid
 import { v4 as uuidv4 } from 'uuid';
-import { User, Habit } from '../types';
+import { User, Habit, Reward } from '../types';
 
 // Define notification type
 export interface Notification {
@@ -71,6 +71,10 @@ interface AppContextType {
   addMessage: (message: AIMessage) => void;
   settings: Settings;
   updateSettings: (settings: Partial<Settings>) => void;
+  // Rewards
+  rewards: Reward[];
+  addReward: (reward: Reward) => void;
+  claimReward: (id: string) => void;
 }
 
 const defaultContext: AppContextType = {
@@ -103,6 +107,10 @@ const defaultContext: AppContextType = {
     reminderTime: '09:00',
   },
   updateSettings: () => {},
+  // Rewards
+  rewards: [],
+  addReward: () => {},
+  claimReward: () => {},
 };
 
 const AppContext = createContext<AppContextType>(defaultContext);
@@ -135,6 +143,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [habits, setHabits] = useState<Habit[]>([]);
   const [checkIns, setCheckIns] = useState<CheckIn[]>([]);
   const [conversation, setConversation] = useState<AIMessage[]>([]);
+  const [rewards, setRewards] = useState<Reward[]>([]);
   const [settings, setSettings] = useState<Settings>({
     theme: 'light',
     notificationsEnabled: true,
@@ -261,6 +270,12 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
           setConversation(JSON.parse(conversationData));
         }
         
+        // Load rewards
+        const rewardsData = await AsyncStorage.getItem('rewards');
+        if (rewardsData) {
+          setRewards(JSON.parse(rewardsData));
+        }
+        
         // Load settings
         const settingsData = await AsyncStorage.getItem('settings');
         if (settingsData) {
@@ -378,6 +393,21 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     }
   }, [conversation, isLoading]);
   
+  // Save rewards when they change
+  useEffect(() => {
+    const saveRewards = async () => {
+      try {
+        await AsyncStorage.setItem('rewards', JSON.stringify(rewards));
+      } catch (error) {
+        console.error('Error saving rewards:', error);
+      }
+    };
+    
+    if (!isLoading) {
+      saveRewards();
+    }
+  }, [rewards, isLoading]);
+  
   // Save settings when they change
   useEffect(() => {
     const saveSettings = async () => {
@@ -468,6 +498,44 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     });
   };
   
+  // Add a new reward
+  const addReward = (reward: Reward) => {
+    setRewards(prev => [...prev, reward]);
+  };
+  
+  // Claim a reward
+  const claimReward = (id: string) => {
+    // Find the reward
+    const reward = rewards.find(r => r.id === id);
+    if (!reward || !user || reward.claimed || !reward.unlocked) return;
+    
+    // Check if user has enough currency
+    if (user.virtualCurrency >= reward.cost) {
+      // Update the reward
+      setRewards(prev => 
+        prev.map(r => 
+          r.id === id ? { ...r, claimed: true } : r
+        )
+      );
+      
+      // Deduct the cost from user's currency
+      setUser({
+        ...user,
+        virtualCurrency: user.virtualCurrency - reward.cost
+      });
+      
+      // Add a notification
+      addNotification({
+        id: uuidv4(),
+        title: 'Reward Claimed',
+        body: `You have claimed the reward: ${reward.title}`,
+        timestamp: new Date().toISOString(),
+        read: false,
+        type: 'achievement'
+      });
+    }
+  };
+  
   // Schedule a local notification with the latest options
   const scheduleNotification = async (
     title: string,
@@ -540,6 +608,10 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         addMessage,
         settings,
         updateSettings,
+        // Rewards
+        rewards,
+        addReward,
+        claimReward,
       }}
     >
       {!isLoading && children}
