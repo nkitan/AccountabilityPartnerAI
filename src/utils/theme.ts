@@ -48,19 +48,6 @@ export const darkTheme: MD3Theme = {
   },
 };
 
-// Helper function to create transparent colors
-export const withOpacity = (color: string, opacity: number): string => {
-  // For hex colors
-  if (color.startsWith('#')) {
-    const r = parseInt(color.slice(1, 3), 16);
-    const g = parseInt(color.slice(3, 5), 16);
-    const b = parseInt(color.slice(5, 7), 16);
-    return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-  }
-  
-  // For named colors or other formats, use a fallback approach
-  return `rgba(103, 80, 164, ${opacity})`;
-};
 
 // Custom hook to use our extended theme
 export const useTheme = () => {

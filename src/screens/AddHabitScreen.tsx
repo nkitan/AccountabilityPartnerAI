@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, View, ScrollView } from 'react-native';
-import { Text, Title, Button } from 'react-native-paper';
+import { Text, Button } from 'react-native-paper';
 import { useTheme } from '../utils/theme';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -42,9 +42,9 @@ const AddHabitScreen: React.FC = () => {
       style={[styles.container, { backgroundColor: theme.colors.background }]}
       contentContainerStyle={styles.contentContainer}
     >
-      <Title style={[styles.title, { color: theme.colors.text }]}>
+      <Text variant="titleLarge" style={[styles.title, { color: theme.colors.text }]}>
         Add New Habit
-      </Title>
+      </Text>
       
       <Text style={[styles.placeholder, { color: theme.colors.placeholder }]}>
         Add habit form to be implemented

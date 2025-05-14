@@ -10,9 +10,7 @@ import {
 import { 
   useTheme, 
   Text, 
-  Card, 
-  Title, 
-  Paragraph, 
+  Card,   
   Button, 
   Avatar, 
   Divider,
@@ -35,6 +33,7 @@ const HomeScreen: React.FC = () => {
   const navigation = useNavigation<HomeScreenNavigationProp>();
   const { 
     user, 
+    setUser,
     habits, 
     checkIns, 
     conversation, 
@@ -56,6 +55,19 @@ const HomeScreen: React.FC = () => {
   useEffect(() => {
     loadTodayData();
   }, [habits, checkIns]);
+  
+  // Update user's streak count based on the highest streak among all habits
+  useEffect(() => {
+    if (user && habits.length > 0) {
+      const highestStreak = Math.max(...habits.map(habit => habit.streakCount));
+      if (highestStreak > (user.streakCount || 0)) {
+        setUser({
+          ...user,
+          streakCount: highestStreak
+        });
+      }
+    }
+  }, [habits, user]);
 
   const loadTodayData = () => {
     // Filter habits for today based on frequency
@@ -127,6 +139,14 @@ const HomeScreen: React.FC = () => {
     updateHabit(updatedHabit);
     addCheckIn(newCheckIn);
     
+    // Update user's streak count if it's higher than current streak
+    if (user && updatedHabit.streakCount > (user.streakCount || 0)) {
+      setUser({
+        ...user,
+        streakCount: updatedHabit.streakCount
+      });
+    }
+    
     // Create a notification
     const notification = {
       id: uuidv4(),
@@ -175,8 +195,8 @@ const HomeScreen: React.FC = () => {
         <Card.Content style={styles.habitCardContent}>
           <View style={styles.habitCardHeader}>
             <View style={styles.habitTitleContainer}>
-              <Title style={{ color: theme.colors.text }}>{habit.title}</Title>
-              <Paragraph style={{ color: theme.colors.placeholder }}>{habit.category}</Paragraph>
+              <Text variant="titleLarge" style={{ color: theme.colors.text }}>{habit.title}</Text>
+              <Text variant="bodyMedium" style={{ color: theme.colors.placeholder }}>{habit.category}</Text>
             </View>
             
             <TouchableOpacity 
@@ -245,7 +265,7 @@ const HomeScreen: React.FC = () => {
       <Card style={[styles.progressCard, { backgroundColor: theme.colors.surface }]}>
         <Card.Content>
           <View style={styles.progressHeader}>
-            <Title style={{ color: theme.colors.text }}>Today's Progress</Title>
+            <Text variant="titleLarge" style={{ color: theme.colors.text }}>Today's Progress</Text>
             <View style={styles.currencyContainer}>
               <Ionicons name="star" size={18} color={theme.colors.reward} />
               <Text style={[styles.currencyText, { color: theme.colors.text }]}>
@@ -293,9 +313,9 @@ const HomeScreen: React.FC = () => {
               </Text>
             </View>
             
-            <Paragraph style={[styles.messageText, { color: theme.colors.text }]}>
+            <Text variant="bodyMedium" style={[styles.messageText, { color: theme.colors.text }]}>
               {todayMessage.content}
-            </Paragraph>
+            </Text>
             
             <Button 
               mode="text" 
@@ -312,7 +332,7 @@ const HomeScreen: React.FC = () => {
       {/* Today's habits */}
       <View style={styles.habitsSection}>
         <View style={styles.sectionHeader}>
-          <Title style={{ color: theme.colors.text }}>Today's Habits</Title>
+          <Text variant="titleLarge" style={{ color: theme.colors.text }}>Today's Habits</Text>
           <Button 
             mode="text" 
             onPress={() => navigation.navigate('Habits')}
@@ -328,9 +348,9 @@ const HomeScreen: React.FC = () => {
           <Card style={[styles.emptyCard, { backgroundColor: theme.colors.surface }]}>
             <Card.Content style={styles.emptyCardContent}>
               <Ionicons name="calendar-outline" size={40} color={theme.colors.placeholder} />
-              <Paragraph style={[styles.emptyText, { color: theme.colors.placeholder }]}>
+              <Text variant="bodyMedium" style={[styles.emptyText, { color: theme.colors.placeholder }]}>
                 No habits scheduled for today
-              </Paragraph>
+              </Text>
               <Button 
                 mode="contained" 
                 onPress={navigateToAddHabit}

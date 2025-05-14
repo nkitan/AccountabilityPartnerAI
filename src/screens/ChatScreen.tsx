@@ -15,7 +15,7 @@ import {
   Surface,
   ActivityIndicator
 } from 'react-native-paper';
-import { useTheme, withOpacity } from '../utils/theme';
+import { useTheme } from '../utils/theme';
 import { useAppContext } from '../context/AppContext';
 import { AIMessage } from '../types';
 import AIPartnerService from '../services/AIPartnerService';

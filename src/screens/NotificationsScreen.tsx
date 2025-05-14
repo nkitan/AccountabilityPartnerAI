@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, View, FlatList } from 'react-native';
-import { Text, Title, Card, Paragraph, Button } from 'react-native-paper';
+import { Text,  Card,  Button } from 'react-native-paper';
 import { useTheme } from '../utils/theme';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -131,12 +131,12 @@ const NotificationsScreen: React.FC = () => {
           </View>
           
           <View style={styles.textContainer}>
-            <Title style={[styles.notificationTitle, { color: theme.colors.text }]}>
+            <Text variant="titleLarge" style={[styles.notificationTitle, { color: theme.colors.text }]}>
               {item.title}
-            </Title>
-            <Paragraph style={[styles.notificationBody, { color: theme.colors.text }]}>
+            </Text>
+            <Text variant="bodyMedium" style={[styles.notificationBody, { color: theme.colors.text }]}>
               {item.body}
-            </Paragraph>
+            </Text>
             <Text style={[styles.timestamp, { color: theme.colors.placeholder }]}>
               {new Date(item.timestamp).toLocaleString()}
             </Text>
@@ -153,7 +153,7 @@ const NotificationsScreen: React.FC = () => {
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <View style={styles.header}>
-        <Title style={[styles.title, { color: theme.colors.text }]}>Notifications</Title>
+        <Text variant="titleLarge" style={[styles.title, { color: theme.colors.text }]}>Notifications</Text>
         
         <Button 
           mode="text" 
@@ -176,9 +176,9 @@ const NotificationsScreen: React.FC = () => {
       ) : (
         <View style={styles.emptyContainer}>
           <Ionicons name="notifications-off" size={80} color={theme.colors.placeholder} />
-          <Paragraph style={[styles.emptyText, { color: theme.colors.placeholder }]}>
+          <Text variant="bodyMedium" style={[styles.emptyText, { color: theme.colors.placeholder }]}>
             No notifications yet
-          </Paragraph>
+          </Text>
         </View>
       )}
       

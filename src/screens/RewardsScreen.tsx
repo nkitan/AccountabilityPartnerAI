@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, View, ScrollView, FlatList } from 'react-native';
-import { Text, Title, Card, Paragraph, Button, Avatar } from 'react-native-paper';
+import { Text,  Card,  Button, Avatar } from 'react-native-paper';
 import { useTheme } from '../utils/theme';
 import { useNavigation } from '@react-navigation/native';
 import { useAppContext } from '../context/AppContext';
@@ -57,8 +57,8 @@ const RewardsScreen: React.FC = () => {
               style={{ backgroundColor: item.unlocked ? theme.colors.reward : theme.colors.disabled }}
             />
             <View style={styles.rewardTitleContainer}>
-              <Title style={{ color: theme.colors.text }}>{item.title}</Title>
-              <Paragraph style={{ color: theme.colors.placeholder }}>{item.description}</Paragraph>
+              <Text variant="titleLarge" style={{ color: theme.colors.text }}>{item.title}</Text>
+              <Text variant="bodyMedium" style={{ color: theme.colors.placeholder }}>{item.description}</Text>
             </View>
           </View>
           
@@ -106,7 +106,7 @@ const RewardsScreen: React.FC = () => {
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <ScrollView contentContainerStyle={styles.contentContainer}>
-        <Title style={[styles.title, { color: theme.colors.text }]}>Rewards</Title>
+        <Text variant="titleLarge" style={[styles.title, { color: theme.colors.text }]}>Rewards</Text>
         
         <View style={styles.balanceContainer}>
           <Ionicons name="star" size={24} color={theme.colors.reward} />
@@ -125,9 +125,9 @@ const RewardsScreen: React.FC = () => {
         ) : (
           <View style={styles.emptyContainer}>
             <Ionicons name="trophy" size={80} color={theme.colors.placeholder} />
-            <Paragraph style={[styles.emptyText, { color: theme.colors.placeholder }]}>
+            <Text variant="bodyMedium" style={[styles.emptyText, { color: theme.colors.placeholder }]}>
               No rewards available yet. Complete habits and build streaks to unlock rewards!
-            </Paragraph>
+            </Text>
           </View>
         )}
         

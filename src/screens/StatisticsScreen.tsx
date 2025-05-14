@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, View, ScrollView } from 'react-native';
-import { Text, Title, Card, Paragraph, Button } from 'react-native-paper';
+import { Text,  Card,  Button } from 'react-native-paper';
 import { useTheme } from '../utils/theme';
 import { useNavigation } from '@react-navigation/native';
 import { useAppContext } from '../context/AppContext';
@@ -35,11 +35,11 @@ const StatisticsScreen: React.FC = () => {
       style={[styles.container, { backgroundColor: theme.colors.background }]}
       contentContainerStyle={styles.contentContainer}
     >
-      <Title style={[styles.title, { color: theme.colors.text }]}>Statistics</Title>
+      <Text variant="titleLarge" style={[styles.title, { color: theme.colors.text }]}>Statistics</Text>
       
       <Card style={[styles.card, { backgroundColor: theme.colors.surface }]}>
         <Card.Content>
-          <Title style={{ color: theme.colors.text }}>Overview</Title>
+          <Text variant="titleLarge" style={{ color: theme.colors.text }}>Overview</Text>
           
           <View style={styles.statsGrid}>
             <View style={styles.statItem}>
@@ -86,14 +86,14 @@ const StatisticsScreen: React.FC = () => {
           <Card.Content>
             <View style={styles.cardHeader}>
               <Ionicons name="flame" size={24} color={theme.colors.streak} />
-              <Title style={[styles.cardTitle, { color: theme.colors.text }]}>
+              <Text variant="titleLarge" style={[styles.cardTitle, { color: theme.colors.text }]}>
                 Longest Streak
-              </Title>
+              </Text>
             </View>
             
-            <Paragraph style={[styles.streakText, { color: theme.colors.text }]}>
+            <Text variant="bodyMedium" style={[styles.streakText, { color: theme.colors.text }]}>
               Your longest streak is {habitWithLongestStreak.streakCount} days for "{habitWithLongestStreak.title}"
-            </Paragraph>
+            </Text>
           </Card.Content>
         </Card>
       )}
@@ -103,35 +103,35 @@ const StatisticsScreen: React.FC = () => {
           <Card.Content>
             <View style={styles.cardHeader}>
               <Ionicons name="checkmark-circle" size={24} color={theme.colors.success} />
-              <Title style={[styles.cardTitle, { color: theme.colors.text }]}>
+              <Text variant="titleLarge" style={[styles.cardTitle, { color: theme.colors.text }]}>
                 Most Consistent Habit
-              </Title>
+              </Text>
             </View>
             
-            <Paragraph style={[styles.streakText, { color: theme.colors.text }]}>
+            <Text variant="bodyMedium" style={[styles.streakText, { color: theme.colors.text }]}>
               You've completed "{habitWithMostCompletions.title}" {habitWithMostCompletions.completedDates.length} times
-            </Paragraph>
+            </Text>
           </Card.Content>
         </Card>
       )}
       
       <Card style={[styles.card, { backgroundColor: theme.colors.surface }]}>
         <Card.Content>
-          <Title style={{ color: theme.colors.text }}>Habit Categories</Title>
+          <Text variant="titleLarge" style={{ color: theme.colors.text }}>Habit Categories</Text>
           
-          <Paragraph style={[styles.placeholderText, { color: theme.colors.placeholder }]}>
+          <Text variant="bodyMedium" style={[styles.placeholderText, { color: theme.colors.placeholder }]}>
             Detailed habit category breakdown charts will be displayed here
-          </Paragraph>
+          </Text>
         </Card.Content>
       </Card>
       
       <Card style={[styles.card, { backgroundColor: theme.colors.surface }]}>
         <Card.Content>
-          <Title style={{ color: theme.colors.text }}>Weekly Progress</Title>
+          <Text variant="titleLarge" style={{ color: theme.colors.text }}>Weekly Progress</Text>
           
-          <Paragraph style={[styles.placeholderText, { color: theme.colors.placeholder }]}>
+          <Text variant="bodyMedium" style={[styles.placeholderText, { color: theme.colors.placeholder }]}>
             Weekly completion rate charts will be displayed here
-          </Paragraph>
+          </Text>
         </Card.Content>
       </Card>
       

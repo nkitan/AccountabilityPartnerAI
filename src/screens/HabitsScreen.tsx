@@ -9,8 +9,6 @@ import {
 import { 
   Text, 
   Card, 
-  Title, 
-  Paragraph, 
   Button, 
   Chip,
   FAB,
@@ -18,7 +16,7 @@ import {
   Menu,
   Divider
 } from 'react-native-paper';
-import { useTheme, withOpacity } from '../utils/theme';
+import { useTheme } from '../utils/theme';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList, Habit, HabitCategory } from '../types';
@@ -172,15 +170,15 @@ const HabitsScreen: React.FC = () => {
       >
         <Card.Content>
           <View style={styles.habitCardHeader}>
-            <Title style={{ color: theme.colors.text }}>{item.title}</Title>
+            <Text variant="titleLarge" style={{ color: theme.colors.text }}>{item.title}</Text>
             <TouchableOpacity onPress={() => openMenu(item)}>
               <Ionicons name="ellipsis-vertical" size={20} color={theme.colors.text} />
             </TouchableOpacity>
           </View>
           
-          <Paragraph style={[styles.habitDescription, { color: theme.colors.text }]} numberOfLines={2}>
+          <Text variant="bodyMedium" style={[styles.habitDescription, { color: theme.colors.text }]} numberOfLines={2}>
             {item.description}
-          </Paragraph>
+          </Text>
           
           <View style={styles.habitMeta}>
             <Chip 
@@ -226,14 +224,14 @@ const HabitsScreen: React.FC = () => {
     return (
       <View style={styles.emptyContainer}>
         <Ionicons name="list" size={80} color={theme.colors.placeholder} />
-        <Title style={[styles.emptyTitle, { color: theme.colors.text }]}>
+        <Text variant="titleLarge" style={[styles.emptyTitle, { color: theme.colors.text }]}>
           No habits found
-        </Title>
-        <Paragraph style={[styles.emptyText, { color: theme.colors.placeholder }]}>
+        </Text>
+        <Text variant="bodyMedium" style={[styles.emptyText, { color: theme.colors.placeholder }]}>
           {searchQuery || selectedCategory !== 'all'
             ? 'Try changing your search or filters'
             : 'Start by adding your first habit'}
-        </Paragraph>
+        </Text>
         <Button 
           mode="contained" 
           onPress={navigateToAddHabit}

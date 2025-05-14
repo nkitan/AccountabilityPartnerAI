@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, View, ScrollView } from 'react-native';
-import { Text, Title, List, Switch, Divider, Button } from 'react-native-paper';
+import { Text,  List, Switch, Divider, Button } from 'react-native-paper';
 import { useTheme } from '../utils/theme';
 import { useNavigation } from '@react-navigation/native';
 import { useAppContext } from '../context/AppContext';
@@ -44,7 +44,7 @@ const SettingsScreen: React.FC = () => {
       style={[styles.container, { backgroundColor: theme.colors.background }]}
       contentContainerStyle={styles.contentContainer}
     >
-      <Title style={[styles.title, { color: theme.colors.text }]}>Settings</Title>
+      <Text variant="titleLarge" style={[styles.title, { color: theme.colors.text }]}>Settings</Text>
       
       <List.Section style={styles.section}>
         <List.Subheader style={{ color: theme.colors.primary }}>Appearance</List.Subheader>

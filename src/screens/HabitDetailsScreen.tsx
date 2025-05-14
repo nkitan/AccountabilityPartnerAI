@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, View, ScrollView } from 'react-native';
-import { Text, Title, Button } from 'react-native-paper';
+import { Text, Button } from 'react-native-paper';
 import { useTheme } from '../utils/theme';
 import { useRoute, RouteProp, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -39,9 +39,9 @@ const HabitDetailsScreen: React.FC = () => {
       style={[styles.container, { backgroundColor: theme.colors.background }]}
       contentContainerStyle={styles.contentContainer}
     >
-      <Title style={[styles.title, { color: theme.colors.text }]}>
+      <Text variant="titleLarge" style={[styles.title, { color: theme.colors.text }]}>
         {habit.title}
-      </Title>
+      </Text>
       
       <Text style={[styles.description, { color: theme.colors.text }]}>
         {habit.description}
