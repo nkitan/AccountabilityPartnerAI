@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, ScrollView } from 'react-native';
+import { StyleSheet, View, ScrollView, TouchableOpacity } from 'react-native';
 import { Text, Button } from 'react-native-paper';
 import { useTheme } from '../utils/theme';
 import { useNavigation } from '@react-navigation/native';
@@ -14,6 +14,7 @@ const AddHabitScreen: React.FC = () => {
   const theme = useTheme();
   const navigation = useNavigation<AddHabitNavigationProp>();
   const { addHabit } = useAppContext();
+  const [selectedPriority, setSelectedPriority] = React.useState<'high' | 'medium' | 'low'>('medium');
   
   // Function to add a sample habit (for demo purposes)
   const addSampleHabit = () => {
@@ -29,6 +30,7 @@ const AddHabitScreen: React.FC = () => {
       completedDates: [],
       active: true,
       color: '#6200EE',
+      priority: selectedPriority,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -46,6 +48,63 @@ const AddHabitScreen: React.FC = () => {
         Add New Habit
       </Text>
       
+      {/* Priority Selection */}
+      <View style={styles.priorityContainer}>
+        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Priority</Text>
+        <View style={styles.priorityOptions}>
+          <TouchableOpacity 
+            style={[
+              styles.priorityOption, 
+              { 
+                backgroundColor: selectedPriority === 'high' ? theme.colors.priorityHigh : 'transparent',
+                borderColor: theme.colors.priorityHigh,
+              }
+            ]}
+            onPress={() => setSelectedPriority('high')}
+          >
+            <Text style={{ 
+              color: selectedPriority === 'high' ? '#fff' : theme.colors.priorityHigh 
+            }}>
+              High
+            </Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={[
+              styles.priorityOption, 
+              { 
+                backgroundColor: selectedPriority === 'medium' ? theme.colors.priorityMedium : 'transparent',
+                borderColor: theme.colors.priorityMedium,
+              }
+            ]}
+            onPress={() => setSelectedPriority('medium')}
+          >
+            <Text style={{ 
+              color: selectedPriority === 'medium' ? '#fff' : theme.colors.priorityMedium 
+            }}>
+              Medium
+            </Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={[
+              styles.priorityOption, 
+              { 
+                backgroundColor: selectedPriority === 'low' ? theme.colors.priorityLow : 'transparent',
+                borderColor: theme.colors.priorityLow,
+              }
+            ]}
+            onPress={() => setSelectedPriority('low')}
+          >
+            <Text style={{ 
+              color: selectedPriority === 'low' ? '#fff' : theme.colors.priorityLow 
+            }}>
+              Low
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+      
       <Text style={[styles.placeholder, { color: theme.colors.placeholder }]}>
         Add habit form to be implemented
       </Text>
@@ -53,7 +112,10 @@ const AddHabitScreen: React.FC = () => {
       <Button 
         mode="contained" 
         onPress={addSampleHabit}
-        style={[styles.button, { backgroundColor: theme.colors.primary }]}
+        style={[styles.button, { 
+          backgroundColor: theme.colors.primaryAction,
+          borderRadius: theme.roundness * 5
+        }]}
       >
         Add Sample Habit
       </Button>
@@ -61,8 +123,11 @@ const AddHabitScreen: React.FC = () => {
       <Button 
         mode="outlined" 
         onPress={() => navigation.goBack()}
-        style={[styles.cancelButton, { borderColor: theme.colors.primary }]}
-        labelStyle={{ color: theme.colors.primary }}
+        style={[styles.cancelButton, { 
+          borderColor: theme.colors.primaryAction,
+          borderRadius: theme.roundness * 5
+        }]}
+        labelStyle={{ color: theme.colors.primaryAction }}
       >
         Cancel
       </Button>
@@ -85,13 +150,41 @@ const styles = StyleSheet.create({
   },
   placeholder: {
     marginBottom: 40,
+    textAlign: 'center',
   },
   button: {
     paddingHorizontal: 16,
     marginBottom: 16,
+    width: '80%',
   },
   cancelButton: {
     paddingHorizontal: 16,
+    width: '80%',
+  },
+  // New styles for priority selection
+  priorityContainer: {
+    width: '100%',
+    marginBottom: 24,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 12,
+    textAlign: 'left',
+    alignSelf: 'flex-start',
+  },
+  priorityOptions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  priorityOption: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    borderWidth: 1,
+    minWidth: '28%',
+    alignItems: 'center',
   },
 });
 

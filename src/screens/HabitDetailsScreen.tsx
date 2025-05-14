@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, View, ScrollView } from 'react-native';
 import { Text, Button } from 'react-native-paper';
+import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../utils/theme';
 import { useRoute, RouteProp, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -43,18 +44,51 @@ const HabitDetailsScreen: React.FC = () => {
         {habit.title}
       </Text>
       
-      <Text style={[styles.description, { color: theme.colors.text }]}>
-        {habit.description}
-      </Text>
+      {/* Streak Information */}
+      <View style={[styles.streakInfoCard, { 
+        backgroundColor: theme.colors.streakContainer,
+        borderRadius: theme.roundness * 2,
+        padding: 16,
+        marginVertical: 12
+      }]}>
+        <Text style={[styles.streakTitle, { color: theme.colors.text }]}>
+          Current Streak
+        </Text>
+        <View style={styles.streakRow}>
+          <Ionicons name="flame" size={24} color={theme.colors.streak} />
+          <Text style={[styles.streakCount, { color: theme.colors.text }]}>
+            {habit.streakCount} days
+          </Text>
+        </View>
+      </View>
+      
+      {/* Goal Focus Section */}
+      <View style={[styles.goalSection, { 
+        backgroundColor: theme.colors.goalFocused + '20', // 20% opacity
+        borderRadius: theme.roundness * 2,
+        padding: 16,
+        marginVertical: 12
+      }]}>
+        <Text style={[styles.sectionTitle, { color: theme.colors.goalFocused }]}>
+          Goal Focus
+        </Text>
+        <Text style={[styles.goalDescription, { color: theme.colors.text }]}>
+          {habit.description}
+        </Text>
+      </View>
       
       <Text style={[styles.placeholder, { color: theme.colors.placeholder }]}>
-        Habit details screen to be implemented
+        More habit details to be implemented
       </Text>
       
       <Button 
         mode="contained" 
         onPress={() => navigation.navigate('EditHabit', { habitId })}
-        style={[styles.button, { backgroundColor: theme.colors.primary }]}
+        style={[styles.button, { 
+          backgroundColor: theme.colors.primaryAction,
+          borderRadius: theme.roundness * 5,
+          marginTop: 20
+        }]}
       >
         Edit Habit
       </Button>
@@ -68,12 +102,13 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     padding: 16,
-    alignItems: 'center',
+    alignItems: 'stretch', // Changed from center to stretch for full-width cards
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 16,
+    textAlign: 'center',
   },
   description: {
     fontSize: 16,
@@ -82,9 +117,42 @@ const styles = StyleSheet.create({
   },
   placeholder: {
     marginBottom: 40,
+    textAlign: 'center',
   },
   button: {
     paddingHorizontal: 16,
+    alignSelf: 'center',
+  },
+  // New styles for streak info
+  streakInfoCard: {
+    width: '100%',
+  },
+  streakTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  streakRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  streakCount: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginLeft: 8,
+  },
+  // New styles for goal section
+  goalSection: {
+    width: '100%',
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  goalDescription: {
+    fontSize: 16,
+    lineHeight: 24,
   },
 });
 

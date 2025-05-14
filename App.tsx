@@ -38,11 +38,11 @@ const Main = () => {
         flex: 1, 
         justifyContent: 'center', 
         alignItems: 'center', 
-        backgroundColor: isDarkMode ? '#121212' : '#F5F5F5' 
+        backgroundColor: isDarkMode ? theme.colors.background : theme.colors.background 
       }}>
         <ActivityIndicator 
           size="large" 
-          color={isDarkMode ? '#BB86FC' : '#6200EE'} 
+          color={isDarkMode ? theme.colors.primaryAction : theme.colors.primaryAction} 
         />
       </View>
     );

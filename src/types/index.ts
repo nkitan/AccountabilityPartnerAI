@@ -57,6 +57,7 @@ export interface Habit {
   completedDates: string[];
   active: boolean;
   color?: string;
+  priority?: 'high' | 'medium' | 'low';
 }
 
 /**

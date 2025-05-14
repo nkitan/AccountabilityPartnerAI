@@ -178,16 +178,22 @@ const HomeScreen: React.FC = () => {
   const renderHabitCard = (habit: Habit) => {
     const isCompleted = habit.completedDates.includes(today);
     
+    // Determine priority color (assuming habit has a priority property, or defaulting to 'medium')
+    const priorityColor = habit.priority === 'high' ? theme.colors.priorityHigh : 
+                         habit.priority === 'low' ? theme.colors.priorityLow : 
+                         theme.colors.priorityMedium;
+    
     return (
       <Card 
         key={habit.id} 
         style={[
           styles.habitCard, 
           { 
-            backgroundColor: theme.colors.surface,
+            backgroundColor: theme.colors.cardBackground,
             borderColor: theme.colors.outline,
-            borderLeftColor: habit.color || theme.colors.primary,
+            borderLeftColor: habit.color || priorityColor,
             borderLeftWidth: 5,
+            borderRadius: theme.roundness * 2
           }
         ]}
         onPress={() => navigation.navigate('HabitDetails', { habitId: habit.id })}
@@ -203,17 +209,17 @@ const HomeScreen: React.FC = () => {
               style={[
                 styles.completeButton, 
                 { 
-                  backgroundColor: isCompleted ? theme.colors.success : theme.colors.surface,
-                  borderColor: isCompleted ? theme.colors.success : theme.colors.primary,
+                  backgroundColor: isCompleted ? theme.colors.taskCompleteBackground : theme.colors.surface,
+                  borderColor: isCompleted ? theme.colors.success : theme.colors.primaryAction,
                 }
               ]}
               onPress={() => handleCompleteHabit(habit)}
               disabled={isCompleted}
             >
               {isCompleted ? (
-                <Ionicons name="checkmark" size={24} color="#fff" />
+                <Ionicons name="checkmark" size={24} color={theme.colors.success} />
               ) : (
-                <Text style={{ color: theme.colors.primary }}>Complete</Text>
+                <Text style={{ color: theme.colors.primaryAction }}>Complete</Text>
               )}
             </TouchableOpacity>
           </View>
@@ -262,7 +268,10 @@ const HomeScreen: React.FC = () => {
       </View>
       
       {/* Progress summary */}
-      <Card style={[styles.progressCard, { backgroundColor: theme.colors.surface }]}>
+      <Card style={[styles.progressCard, { 
+        backgroundColor: theme.colors.cardBackground,
+        borderRadius: theme.roundness * 3
+      }]}>
         <Card.Content>
           <View style={styles.progressHeader}>
             <Text variant="titleLarge" style={{ color: theme.colors.text }}>Today's Progress</Text>
@@ -277,7 +286,7 @@ const HomeScreen: React.FC = () => {
           <View style={styles.progressBarContainer}>
             <ProgressBar 
               progress={todayHabits.length > 0 ? completedToday / todayHabits.length : 0} 
-              color={theme.colors.primary}
+              color={theme.colors.primaryAction}
               style={styles.progressBar}
             />
             <Text style={[styles.progressText, { color: theme.colors.text }]}>
@@ -297,7 +306,10 @@ const HomeScreen: React.FC = () => {
       {/* AI Partner message */}
       {todayMessage && (
         <Card 
-          style={[styles.messageCard, { backgroundColor: theme.colors.primary + '15' }]}
+          style={[styles.messageCard, { 
+            backgroundColor: theme.colors.infoContainer,
+            borderRadius: theme.roundness * 3
+          }]}
           onPress={navigateToChat}
         >
           <Card.Content style={styles.messageCardContent}>
@@ -305,10 +317,10 @@ const HomeScreen: React.FC = () => {
               <Avatar.Icon 
                 size={40} 
                 icon="robot" 
-                backgroundColor={theme.colors.primary}
+                backgroundColor={theme.colors.primaryAction}
                 color="#fff"
               />
-              <Text style={[styles.messageTitle, { color: theme.colors.primary }]}>
+              <Text style={[styles.messageTitle, { color: theme.colors.primaryAction }]}>
                 Your Accountability Partner
               </Text>
             </View>
@@ -321,7 +333,7 @@ const HomeScreen: React.FC = () => {
               mode="text" 
               onPress={navigateToChat}
               style={styles.chatButton}
-              labelStyle={{ color: theme.colors.primary }}
+              labelStyle={{ color: theme.colors.primaryAction }}
             >
               Continue Chat
             </Button>
@@ -345,7 +357,10 @@ const HomeScreen: React.FC = () => {
         {todayHabits.length > 0 ? (
           todayHabits.map(habit => renderHabitCard(habit))
         ) : (
-          <Card style={[styles.emptyCard, { backgroundColor: theme.colors.surface }]}>
+          <Card style={[styles.emptyCard, { 
+            backgroundColor: theme.colors.cardBackground,
+            borderRadius: theme.roundness * 2
+          }]}>
             <Card.Content style={styles.emptyCardContent}>
               <Ionicons name="calendar-outline" size={40} color={theme.colors.placeholder} />
               <Text variant="bodyMedium" style={[styles.emptyText, { color: theme.colors.placeholder }]}>
@@ -354,7 +369,10 @@ const HomeScreen: React.FC = () => {
               <Button 
                 mode="contained" 
                 onPress={navigateToAddHabit}
-                style={[styles.addButton, { backgroundColor: theme.colors.primary }]}
+                style={[styles.addButton, { 
+                  backgroundColor: theme.colors.primaryAction,
+                  borderRadius: theme.roundness * 5
+                }]}
               >
                 Add a Habit
               </Button>
@@ -368,7 +386,10 @@ const HomeScreen: React.FC = () => {
         <Button 
           mode="contained" 
           onPress={navigateToAddHabit}
-          style={[styles.floatingButton, { backgroundColor: theme.colors.primary }]}
+          style={[styles.floatingButton, { 
+            backgroundColor: theme.colors.primaryAction,
+            borderRadius: theme.roundness * 7
+          }]}
           icon="plus"
         >
           Add Habit
