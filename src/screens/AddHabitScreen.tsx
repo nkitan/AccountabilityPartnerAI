@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, View, ScrollView, TouchableOpacity } from 'react-native';
-import { Text, Button } from 'react-native-paper';
+import { Text, Button, Chip } from 'react-native-paper';
 import { useTheme } from '../utils/theme';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -15,6 +15,12 @@ const AddHabitScreen: React.FC = () => {
   const navigation = useNavigation<AddHabitNavigationProp>();
   const { addHabit } = useAppContext();
   const [selectedPriority, setSelectedPriority] = React.useState<'high' | 'medium' | 'low'>('medium');
+  const [selectedCategory, setSelectedCategory] = React.useState<string>('work');
+
+  // Available categories
+  const categories = [
+    'work', 'fitness', 'mindfulness', 'learning', 'social', 'health', 'creativity', 'custom'
+  ];
   
   // Function to add a sample habit (for demo purposes)
   const addSampleHabit = () => {
@@ -22,7 +28,7 @@ const AddHabitScreen: React.FC = () => {
       id: uuidv4(), // Using v4 (random) for better compatibility
       title: 'Sample Habit',
       description: 'This is a sample habit for demonstration purposes.',
-      category: 'productivity' as any,
+      category: selectedCategory,
       frequency: 'daily',
       startDate: new Date().toISOString(),
       streakCount: 0,
@@ -105,6 +111,40 @@ const AddHabitScreen: React.FC = () => {
         </View>
       </View>
       
+      {/* Category Selection */}
+      <View style={styles.categoryContainer}>
+        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Category</Text>
+        <ScrollView 
+          horizontal 
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.categoryChipsContainer}
+        >
+          {categories.map((category) => (
+            <Chip
+              key={category}
+              selected={selectedCategory === category}
+              onPress={() => setSelectedCategory(category)}
+              style={[
+                styles.categoryChip,
+                { 
+                  backgroundColor: selectedCategory === category 
+                    ? theme.colors.primary 
+                    : theme.colors.surface,
+                  borderColor: theme.colors.primary
+                }
+              ]}
+              textStyle={{ 
+                color: selectedCategory === category 
+                  ? '#fff' 
+                  : theme.colors.primary 
+              }}
+            >
+              {category.charAt(0).toUpperCase() + category.slice(1)}
+            </Chip>
+          ))}
+        </ScrollView>
+      </View>
+      
       <Text style={[styles.placeholder, { color: theme.colors.placeholder }]}>
         Add habit form to be implemented
       </Text>
@@ -161,7 +201,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     width: '80%',
   },
-  // New styles for priority selection
+  // Styles for priority selection
   priorityContainer: {
     width: '100%',
     marginBottom: 24,
@@ -185,6 +225,22 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     minWidth: '28%',
     alignItems: 'center',
+  },
+  // Styles for category selection
+  categoryContainer: {
+    width: '100%',
+    marginBottom: 24,
+  },
+  categoryChipsContainer: {
+    paddingVertical: 8,
+  },
+  categoryChip: {
+    marginRight: 8,
+    borderWidth: 1,
+    minWidth: 90, // Set a fixed minimum width for all chips
+    justifyContent: 'center', // Center the text horizontally
+    height: 36, // Set a fixed height for all chips
+    alignItems: 'center', // Center content vertically
   },
 });
 

@@ -11,6 +11,10 @@ declare global {
       info: string;
       text: string;
       placeholder: string;
+      achievement: string;
+      achievementContainer: string;
+      milestone: string;
+      milestoneContainer: string;
     }
   }
 }
@@ -64,6 +68,12 @@ export const lightTheme: MD3Theme = {
     warningContainer: '#FFF9C4', // Lighter yellow for backgrounds of warning messages
     streakContainer: '#FFE0B2',  // Lighter orange for streak related UI elements
     rewardContainer: '#FFECB3',  // Lighter gold for reward related UI elements
+    
+    // Achievement and Milestone colors
+    achievement: '#9C27B0',      // Purple for achievements
+    achievementContainer: '#E1BEE7', // Light purple for achievement backgrounds
+    milestone: '#2196F3',        // Blue for milestones
+    milestoneContainer: '#BBDEFB' // Light blue for milestone backgrounds
   },
   roundness: 4,
   // fonts: configureFonts({config: yourFontConfig}),
@@ -116,6 +126,12 @@ export const darkTheme: MD3Theme = {
     warningContainer: '#F57F17', // Darker yellow/amber for backgrounds of warning messages
     streakContainer: '#E65100',  // Darker orange
     rewardContainer: '#FF8F00',  // Darker gold
+    
+    // Achievement and Milestone colors
+    achievement: '#CE93D8',      // Lighter purple for dark mode
+    achievementContainer: '#4A148C', // Darker purple for dark mode backgrounds
+    milestone: '#64B5F6',        // Lighter blue for dark mode
+    milestoneContainer: '#0D47A1' // Darker blue for dark mode backgrounds
   },
   roundness: 4,
   // fonts: configureFonts({config: yourFontConfig}),

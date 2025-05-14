@@ -4,7 +4,8 @@ import {
   View, 
   FlatList, 
   TouchableOpacity,
-  RefreshControl
+  RefreshControl,
+  ScrollView
 } from 'react-native';
 import { 
   Text, 
@@ -37,6 +38,7 @@ const HabitsScreen: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<HabitCategory | 'all'>('all');
   const [menuVisible, setMenuVisible] = useState(false);
   const [selectedHabit, setSelectedHabit] = useState<Habit | null>(null);
+  const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
   
   // Filter habits based on search and category
   useEffect(() => {
@@ -83,7 +85,10 @@ const HabitsScreen: React.FC = () => {
   };
 
   // Open habit menu
-  const openMenu = (habit: Habit) => {
+  const openMenu = (habit: Habit, event: any) => {
+    // Get the position of the touch event
+    const { pageX, pageY } = event.nativeEvent;
+    setMenuPosition({ x: pageX, y: pageY });
     setSelectedHabit(habit);
     setMenuVisible(true);
   };
@@ -117,12 +122,14 @@ const HabitsScreen: React.FC = () => {
     ];
     
     return (
-      <FlatList
+      <ScrollView
         horizontal
-        data={categories}
-        keyExtractor={(item) => item}
-        renderItem={({ item }) => (
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.categoryChipsContainer}
+      >
+        {categories.map((item) => (
           <Chip
+            key={item}
             selected={selectedCategory === item}
             onPress={() => handleCategorySelect(item)}
             style={[
@@ -142,10 +149,8 @@ const HabitsScreen: React.FC = () => {
           >
             {item === 'all' ? 'All' : item.charAt(0).toUpperCase() + item.slice(1)}
           </Chip>
-        )}
-        contentContainerStyle={styles.categoryChipsContainer}
-        showsHorizontalScrollIndicator={false}
-      />
+        ))}
+      </ScrollView>
     );
   };
 
@@ -171,7 +176,7 @@ const HabitsScreen: React.FC = () => {
         <Card.Content>
           <View style={styles.habitCardHeader}>
             <Text variant="titleLarge" style={{ color: theme.colors.text }}>{item.title}</Text>
-            <TouchableOpacity onPress={() => openMenu(item)}>
+            <TouchableOpacity onPress={(event) => openMenu(item, event)}>
               <Ionicons name="ellipsis-vertical" size={20} color={theme.colors.text} />
             </TouchableOpacity>
           </View>
@@ -194,6 +199,54 @@ const HabitsScreen: React.FC = () => {
             >
               {item.frequency}
             </Chip>
+            
+            {item.priority && (
+              <Chip 
+                style={[
+                  styles.priorityTag, 
+                  { 
+                    backgroundColor: 
+                      item.priority === 'high' 
+                        ? 'rgba(255, 87, 34, 0.2)' 
+                        : item.priority === 'medium'
+                          ? 'rgba(255, 193, 7, 0.2)'
+                          : 'rgba(76, 175, 80, 0.2)',
+                    paddingHorizontal: 8
+                  }
+                ]}
+                textStyle={{ 
+                  color: 
+                    item.priority === 'high' 
+                      ? theme.colors.priorityHigh || '#FF5722' 
+                      : item.priority === 'medium'
+                        ? theme.colors.priorityMedium || '#FFC107'
+                        : theme.colors.priorityLow || '#4CAF50',
+                  fontSize: 12,
+                  fontWeight: '500'
+                }}
+                icon={() => (
+                  <Ionicons 
+                    name={
+                      item.priority === 'high' 
+                        ? "flash" 
+                        : item.priority === 'medium'
+                          ? "alert"
+                          : "leaf"
+                    }
+                    size={16} 
+                    color={
+                      item.priority === 'high' 
+                        ? theme.colors.priorityHigh || '#FF5722' 
+                        : item.priority === 'medium'
+                          ? theme.colors.priorityMedium || '#FFC107'
+                          : theme.colors.priorityLow || '#4CAF50'
+                    }
+                  />
+                )}
+              >
+                {item.priority.charAt(0).toUpperCase() + item.priority.slice(1)}
+              </Chip>
+            )}
           </View>
           
           <View style={styles.habitFooter}>
@@ -247,32 +300,39 @@ const HabitsScreen: React.FC = () => {
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <StatusBar style="auto" />
       
-      {/* Search bar */}
-      <Searchbar
-        placeholder="Search habits..."
-        onChangeText={onChangeSearch}
-        value={searchQuery}
-        style={[styles.searchBar, { backgroundColor: theme.colors.surface }]}
-        theme={{ colors: { primary: theme.colors.primary } }}
-        inputStyle={{ color: theme.colors.text }}
-        placeholderTextColor={theme.colors.placeholder}
-      />
-      
-      {/* Category filter */}
-      {renderCategoryChips()}
+      <View style={styles.headerContainer}>
+        {/* Search bar */}
+        <Searchbar
+          placeholder="Search habits..."
+          onChangeText={onChangeSearch}
+          value={searchQuery}
+          style={[styles.searchBar, { backgroundColor: theme.colors.surface }]}
+          theme={{ colors: { primary: theme.colors.primary } }}
+          inputStyle={{ color: theme.colors.text }}
+          placeholderTextColor={theme.colors.placeholder}
+        />
+        
+        {/* Category filter */}
+        {renderCategoryChips()}
+      </View>
       
       {/* Habits list */}
-      <FlatList
-        data={filteredHabits}
-        renderItem={renderHabitCard}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.habitsList}
-        showsVerticalScrollIndicator={false}
-        ListEmptyComponent={renderEmptyState}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-      />
+      {filteredHabits.length > 0 ? (
+        <FlatList
+          data={filteredHabits}
+          renderItem={renderHabitCard}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.habitsList}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+        />
+      ) : (
+        <View style={styles.emptyStateContainer}>
+          {renderEmptyState()}
+        </View>
+      )}
       
       {/* Floating action button */}
       <FAB
@@ -286,7 +346,7 @@ const HabitsScreen: React.FC = () => {
       <Menu
         visible={menuVisible}
         onDismiss={closeMenu}
-        anchor={{ x: 0, y: 0 }} // This will be positioned properly when opened
+        anchor={menuPosition}
         style={[styles.menu, { backgroundColor: theme.colors.surface }]}
       >
         <Menu.Item 
@@ -310,6 +370,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
+    paddingBottom: 0, // Remove bottom padding to avoid extra space
+  },
+  headerContainer: {
+    marginBottom: 8,
   },
   searchBar: {
     marginBottom: 16,
@@ -317,14 +381,24 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   categoryChipsContainer: {
-    paddingVertical: 8,
+    paddingTop: 8,
+    paddingBottom: 12, // Add a bit more space below the category chips
   },
   categoryChip: {
     marginRight: 8,
     borderWidth: 1,
+    minWidth: 90, // Set a fixed minimum width for all chips
+    justifyContent: 'center', // Center the text horizontally
+    height: 36, // Set a fixed height for all chips
+    alignItems: 'center', // Center content vertically
   },
   habitsList: {
     paddingBottom: 80,
+  },
+  emptyStateContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   habitCard: {
     marginBottom: 16,
@@ -341,12 +415,32 @@ const styles = StyleSheet.create({
   },
   habitMeta: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     marginBottom: 12,
   },
   categoryTag: {
     marginRight: 8,
+    paddingVertical: 2,
+    paddingHorizontal: 8,
+    borderRadius: 16,
   },
-  frequencyTag: {},
+  frequencyTag: {
+    marginRight: 8,
+    paddingVertical: 2,
+    paddingHorizontal: 8,
+    borderRadius: 16,
+  },
+  priorityTag: {
+    marginTop: 4, // Add a small margin at the top if chips wrap to next line
+    marginRight: 8,
+    paddingVertical: 2,
+    paddingHorizontal: 8,
+    minWidth: 36,
+    minHeight: 36,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 18,
+  },
   habitFooter: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -371,11 +465,9 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   emptyContainer: {
-    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
-    marginTop: 40,
   },
   emptyTitle: {
     marginTop: 16,

@@ -15,7 +15,8 @@ import {
   Avatar, 
   Divider,
   IconButton,
-  ProgressBar
+  ProgressBar,
+  Chip
 } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -94,6 +95,31 @@ const HomeScreen: React.FC = () => {
       habit.completedDates.includes(today)
     ).length;
     
+    // Check if all habits for today are completed and it's a new completion
+    if (filteredHabits.length > 0 && completed === filteredHabits.length && completed > completedToday) {
+      // Award consistency bonus
+      const consistencyBonus = 15;
+      
+      if (user) {
+        setUser({
+          ...user,
+          virtualCurrency: (user.virtualCurrency || 0) + consistencyBonus
+        });
+        
+        // Create a notification for the consistency bonus
+        const bonusNotification = {
+          id: uuidv4(),
+          title: 'Daily Bonus!',
+          body: `You completed all habits for today! +${consistencyBonus} points bonus!`,
+          timestamp: new Date().toISOString(),
+          read: false,
+          type: 'reward'
+        };
+        
+        addNotification(bonusNotification);
+      }
+    }
+    
     setCompletedToday(completed);
     
     // Generate a daily message if none exists
@@ -139,15 +165,52 @@ const HomeScreen: React.FC = () => {
     updateHabit(updatedHabit);
     addCheckIn(newCheckIn);
     
-    // Update user's streak count if it's higher than current streak
-    if (user && updatedHabit.streakCount > (user.streakCount || 0)) {
+    // Calculate points earned
+    // Base points for completing any habit
+    let pointsEarned = 10;
+    
+    // Priority bonus
+    if (habit.priority) {
+      if (habit.priority === 'high') pointsEarned += 5;
+      else if (habit.priority === 'medium') pointsEarned += 3;
+    }
+    
+    // Streak bonus (capped at 20 points)
+    const streakBonus = Math.min(Math.floor(updatedHabit.streakCount / 7) * 5, 20);
+    pointsEarned += streakBonus;
+    
+    // Check for streak milestones
+    const streakMilestones = [7, 14, 30, 60, 90, 180, 365];
+    let milestoneBonus = 0;
+    
+    if (streakMilestones.includes(updatedHabit.streakCount)) {
+      milestoneBonus = updatedHabit.streakCount * 2; // 2 points per day in the streak
+      pointsEarned += milestoneBonus;
+      
+      // Create a milestone notification
+      const milestoneNotification = {
+        id: uuidv4(),
+        title: `${updatedHabit.streakCount} Day Streak!`,
+        body: `Amazing! You've maintained ${habit.title} for ${updatedHabit.streakCount} days! +${milestoneBonus} points bonus!`,
+        timestamp: new Date().toISOString(),
+        read: false,
+        type: 'milestone',
+        relatedHabitId: habit.id
+      };
+      
+      addNotification(milestoneNotification);
+    }
+    
+    // Update user's virtual currency and streak count
+    if (user) {
       setUser({
         ...user,
-        streakCount: updatedHabit.streakCount
+        streakCount: Math.max(updatedHabit.streakCount, user.streakCount || 0),
+        virtualCurrency: (user.virtualCurrency || 0) + pointsEarned
       });
     }
     
-    // Create a notification
+    // Create a notification for habit completion
     const notification = {
       id: uuidv4(),
       title: 'Habit Completed',
@@ -159,6 +222,19 @@ const HomeScreen: React.FC = () => {
     };
     
     addNotification(notification);
+    
+    // Create a notification for points earned
+    const pointsNotification = {
+      id: uuidv4(),
+      title: 'Points Earned',
+      body: `You earned ${pointsEarned} points for completing ${habit.title}!${streakBonus > 0 ? ` (includes +${streakBonus} streak bonus)` : ''}${milestoneBonus > 0 ? ` (includes +${milestoneBonus} milestone bonus)` : ''}`,
+      timestamp: new Date().toISOString(),
+      read: false,
+      type: 'reward',
+      relatedHabitId: habit.id
+    };
+    
+    addNotification(pointsNotification);
     
     // Refresh data
     loadTodayData();
@@ -202,7 +278,57 @@ const HomeScreen: React.FC = () => {
           <View style={styles.habitCardHeader}>
             <View style={styles.habitTitleContainer}>
               <Text variant="titleLarge" style={{ color: theme.colors.text }}>{habit.title}</Text>
-              <Text variant="bodyMedium" style={{ color: theme.colors.placeholder }}>{habit.category}</Text>
+              <View style={styles.habitMetaContainer}>
+                <Text variant="bodyMedium" style={{ color: theme.colors.placeholder, marginRight: 8 }}>{habit.category}</Text>
+                {habit.priority && (
+                  <Chip 
+                    style={[
+                      styles.priorityChip, 
+                      { 
+                        backgroundColor: 
+                          habit.priority === 'high' 
+                            ? 'rgba(255, 87, 34, 0.2)' 
+                            : habit.priority === 'medium'
+                              ? 'rgba(255, 193, 7, 0.2)'
+                              : 'rgba(76, 175, 80, 0.2)',
+                        height: 32,
+                        width: 'auto'
+                      }
+                    ]}
+                    textStyle={{ 
+                      color: 
+                        habit.priority === 'high' 
+                          ? theme.colors.priorityHigh || '#FF5722' 
+                          : habit.priority === 'medium'
+                            ? theme.colors.priorityMedium || '#FFC107'
+                            : theme.colors.priorityLow || '#4CAF50',
+                      fontSize: 12,
+                      fontWeight: '500'
+                    }}
+                    icon={() => (
+                      <Ionicons 
+                        name={
+                          habit.priority === 'high' 
+                            ? "flash" 
+                            : habit.priority === 'medium'
+                              ? "alert"
+                              : "leaf"
+                        }
+                        size={14} 
+                        color={
+                          habit.priority === 'high' 
+                            ? theme.colors.priorityHigh || '#FF5722' 
+                            : habit.priority === 'medium'
+                              ? theme.colors.priorityMedium || '#FFC107'
+                              : theme.colors.priorityLow || '#4CAF50'
+                        }
+                      />
+                    )}
+                  >
+                    {habit.priority.charAt(0).toUpperCase() + habit.priority.slice(1)}
+                  </Chip>
+                )}
+              </View>
             </View>
             
             <TouchableOpacity 
@@ -511,6 +637,21 @@ const styles = StyleSheet.create({
   },
   habitTitleContainer: {
     flex: 1,
+  },
+  habitMetaContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  priorityChip: {
+    borderRadius: 12,
+    paddingVertical: 2,
+    paddingHorizontal: 4,
+    minWidth: 32,
+    minHeight: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 4,
   },
   completeButton: {
     paddingHorizontal: 12,
