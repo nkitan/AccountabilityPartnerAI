@@ -48,11 +48,12 @@ const ProfileScreen: React.FC = () => {
     ? habits.reduce((prev, current) => (prev.streakCount > current.streakCount) ? prev : current) 
     : null;
   
-  // Handle theme toggle
+  // Handle theme toggle - will update immediately
   const toggleTheme = () => {
     updateSettings({ 
       theme: settings.theme === 'light' ? 'dark' : 'light' 
     });
+    // Theme will change immediately due to our AppContext changes
   };
   
   // Handle notifications toggle

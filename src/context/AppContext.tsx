@@ -399,8 +399,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       const newMode = !isDarkMode;
       setIsDarkMode(newMode);
       await AsyncStorage.setItem('isDarkMode', JSON.stringify(newMode));
-      // Also update the settings theme
-      updateSettings({ theme: newMode ? 'dark' : 'light' });
+      // Also update the settings theme (without triggering setIsDarkMode again)
+      setSettings(prev => ({ ...prev, theme: newMode ? 'dark' : 'light' }));
     } catch (error) {
       console.error('Error toggling theme:', error);
     }
@@ -458,7 +458,14 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   
   // Update settings
   const updateSettings = (newSettings: Partial<Settings>) => {
-    setSettings(prev => ({ ...prev, ...newSettings }));
+    setSettings(prev => {
+      const updatedSettings = { ...prev, ...newSettings };
+      // If theme is being updated, also update isDarkMode immediately
+      if (newSettings.theme) {
+        setIsDarkMode(newSettings.theme === 'dark');
+      }
+      return updatedSettings;
+    });
   };
   
   // Schedule a local notification with the latest options

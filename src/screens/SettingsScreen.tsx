@@ -10,11 +10,12 @@ const SettingsScreen: React.FC = () => {
   const navigation = useNavigation();
   const { settings, updateSettings } = useAppContext();
   
-  // Handle theme toggle
+  // Handle theme toggle - will update immediately
   const toggleTheme = () => {
     updateSettings({ 
       theme: settings.theme === 'light' ? 'dark' : 'light' 
     });
+    // Theme will change immediately due to our AppContext changes
   };
   
   // Handle notifications toggle
