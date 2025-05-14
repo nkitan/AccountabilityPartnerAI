@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, ScrollView, RefreshControl } from 'react-native';
-import { Text, Card, Button, Surface, Divider, Chip, ProgressBar, useTheme as usePaperTheme } from 'react-native-paper';
+import { Text, Card, Button, Surface, Divider, Chip, ProgressBar, useTheme as usePaperTheme, SegmentedButtons } from 'react-native-paper';
 import { useTheme } from '../utils/theme';
 import { useNavigation } from '@react-navigation/native';
 import { useAppContext } from '../context/AppContext';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
+import { BarChart, PieChart } from 'react-native-gifted-charts';
 
 const StatisticsScreen: React.FC = () => {
   const theme = useTheme();
@@ -13,7 +14,53 @@ const StatisticsScreen: React.FC = () => {
   const navigation = useNavigation();
   const { habits, checkIns, user } = useAppContext();
   const [refreshing, setRefreshing] = useState(false);
+  const [categoryChartType, setCategoryChartType] = useState('bar');
+  const [priorityChartType, setPriorityChartType] = useState('bar');
   
+  // Helper function to get color for category
+  const getCategoryColor = (category: string) => {
+    switch(category.toLowerCase()) {
+      case 'health':
+        return theme.colors.success;
+      case 'work':
+        return theme.colors.primary;
+      case 'personal':
+        return theme.colors.info;
+      case 'learning':
+        return theme.colors.milestone;
+      default:
+        return theme.colors.placeholder;
+    }
+  };
+  
+  // Helper function to get color for priority
+  const getPriorityColor = (priority: string) => {
+    switch(priority.toLowerCase()) {
+      case 'high':
+        return theme.colors.priorityHigh;
+      case 'medium':
+        return theme.colors.priorityMedium;
+      case 'low':
+        return theme.colors.priorityLow;
+      default:
+        return theme.colors.placeholder;
+    }
+  };
+  
+  // Helper function to get icon for priority
+  const getPriorityIcon = (priority: string): string => {
+    switch(priority.toLowerCase()) {
+      case 'high':
+        return 'flash';
+      case 'medium':
+        return 'alert-circle';
+      case 'low':
+        return 'leaf';
+      default:
+        return 'help-circle';
+    }
+  };
+
   // Handle refresh
   const onRefresh = () => {
     setRefreshing(true);
@@ -54,6 +101,32 @@ const StatisticsScreen: React.FC = () => {
     return acc;
   }, {} as Record<string, number>);
   
+  // Calculate total count of categories for accurate percentage calculation
+  const totalCategoryCount = Object.values(categoryDistribution).reduce((sum, count) => sum + count, 0);
+  
+  // Prepare data for bar chart
+  const categoryBarData = Object.entries(categoryDistribution).map(([category, count]) => ({
+    value: count,
+    label: category,
+    frontColor: getCategoryColor(category),
+    topLabelComponent: () => (
+      <Text style={{ color: theme.colors.text, fontSize: 12, marginBottom: 4 }}>
+        {((count / totalCategoryCount) * 100).toFixed(1)}%
+      </Text>
+    )
+  }));
+  
+  // Prepare data for pie chart
+  const categoryPieData = Object.entries(categoryDistribution).map(([category, count]) => ({
+    value: count,
+    label: category,
+    color: getCategoryColor(category),
+    text: `${((count / totalCategoryCount) * 100).toFixed(1)}%`,
+    textColor: theme.colors.text,
+    shiftTextX: 0,
+    shiftTextY: 0,
+  }));
+  
   // Calculate priority distribution
   const priorityDistribution = habits.reduce((acc, habit) => {
     const priority = habit.priority || 'none';
@@ -61,49 +134,31 @@ const StatisticsScreen: React.FC = () => {
     return acc;
   }, {} as Record<string, number>);
   
-  // Helper function to get color for category
-  const getCategoryColor = (category: string) => {
-    switch(category.toLowerCase()) {
-      case 'health':
-        return theme.colors.success;
-      case 'work':
-        return theme.colors.primary;
-      case 'personal':
-        return theme.colors.info;
-      case 'learning':
-        return theme.colors.milestone;
-      default:
-        return theme.colors.placeholder;
-    }
-  };
+  // Calculate total count of priorities for accurate percentage calculation
+  const totalPriorityCount = Object.values(priorityDistribution).reduce((sum, count) => sum + count, 0);
   
-  // Helper function to get color for priority
-  const getPriorityColor = (priority: string) => {
-    switch(priority.toLowerCase()) {
-      case 'high':
-        return theme.colors.priorityHigh;
-      case 'medium':
-        return theme.colors.priorityMedium;
-      case 'low':
-        return theme.colors.priorityLow;
-      default:
-        return theme.colors.placeholder;
-    }
-  };
+  // Prepare data for bar chart
+  const priorityBarData = Object.entries(priorityDistribution).map(([priority, count]) => ({
+    value: count,
+    label: priority.charAt(0).toUpperCase() + priority.slice(1),
+    frontColor: getPriorityColor(priority),
+    topLabelComponent: () => (
+      <Text style={{ color: theme.colors.text, fontSize: 12, marginBottom: 4 }}>
+        {((count / totalPriorityCount) * 100).toFixed(1)}%
+      </Text>
+    )
+  }));
   
-  // Helper function to get icon for priority
-  const getPriorityIcon = (priority: string) => {
-    switch(priority.toLowerCase()) {
-      case 'high':
-        return 'flash';
-      case 'medium':
-        return 'alert';
-      case 'low':
-        return 'leaf';
-      default:
-        return 'help-circle';
-    }
-  };
+  // Prepare data for pie chart
+  const priorityPieData = Object.entries(priorityDistribution).map(([priority, count]) => ({
+    value: count,
+    label: priority.charAt(0).toUpperCase() + priority.slice(1),
+    color: getPriorityColor(priority),
+    text: `${((count / totalPriorityCount) * 100).toFixed(1)}%`,
+    textColor: theme.colors.text,
+    shiftTextX: 0,
+    shiftTextY: 0
+  }));
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
@@ -406,39 +461,92 @@ const StatisticsScreen: React.FC = () => {
               </Text>
             </View>
             
+            <View style={styles.chartTypeSelector}>
+              <SegmentedButtons
+                value={categoryChartType}
+                onValueChange={setCategoryChartType}
+                buttons={[
+                  {
+                    value: 'bar',
+                    icon: 'chart-bar',
+                    label: 'Bar'
+                  },
+                  {
+                    value: 'pie',
+                    icon: 'chart-pie',
+                    label: 'Pie'
+                  },
+                ]}
+              />
+            </View>
+            
             <Divider style={{ marginVertical: 12 }} />
             
             {Object.keys(categoryDistribution).length > 0 ? (
-              <View style={styles.distributionContainer}>
-                {Object.entries(categoryDistribution).map(([category, count]) => (
-                  <View key={category} style={styles.distributionItem}>
-                    <View style={styles.distributionLabelContainer}>
-                      <View style={[styles.categoryDot, { 
-                        backgroundColor: getCategoryColor(category)
-                      }]} />
-                      <Text style={[styles.distributionLabel, { 
-                        color: theme.colors.text
-                      }]}>
-                        {category} ({count})
-                      </Text>
-                    </View>
-                    
-                    <View style={styles.distributionBarContainer}>
-                      <View style={[styles.distributionBar, { 
-                        backgroundColor: getCategoryColor(category) + '40',
-                        width: `${(count / totalHabits) * 100}%`
-                      }]}>
-                        <Text style={[styles.distributionPercentage, { 
-                          color: theme.colors.text,
-                          fontWeight: 'bold'
-                        }]}>
-                          {Math.round((count / totalHabits) * 100)}%
+              categoryChartType === 'bar' ? (
+                <View style={styles.chartContainer}>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                    <BarChart
+                      data={categoryBarData}
+                      barWidth={30}
+                      spacing={24}
+                      roundedTop
+                      roundedBottom
+                      hideRules
+                      xAxisThickness={1}
+                      yAxisThickness={1}
+                      xAxisColor={theme.colors.outline}
+                      yAxisColor={theme.colors.outline}
+                      yAxisTextStyle={{ color: theme.colors.text }}
+                      xAxisLabelTextStyle={{ color: theme.colors.text, textAlign: 'center' }}
+                      noOfSections={5}
+                      maxValue={Math.max(...Object.values(categoryDistribution)) + 1}
+                      labelWidth={80}
+                      backgroundColor={theme.colors.surface}
+                      height={200}
+                      width={Math.max(300, Object.keys(categoryDistribution).length * 70)}
+                      showFractionalValues
+                      showGradient
+                      gradientColor={theme.colors.background}
+                    />
+                  </ScrollView>
+                </View>
+              ) : (
+                <View style={styles.chartContainer}>
+                  <PieChart
+                    data={categoryPieData}
+                    donut
+                    showGradient
+                    sectionAutoFocus
+                    radius={90}
+                    innerRadius={60}
+                    innerCircleColor={theme.colors.background}
+                    centerLabelComponent={() => (
+                      <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+                        <Text style={{ color: theme.colors.text, fontSize: 22, fontWeight: 'bold' }}>
+                          {totalCategoryCount}
+                        </Text>
+                        <Text style={{ color: theme.colors.onSurfaceVariant, fontSize: 12 }}>
+                          Total
                         </Text>
                       </View>
-                    </View>
+                    )}
+                  />
+                  
+                  <View style={styles.legendContainer}>
+                    {Object.entries(categoryDistribution)
+                      .sort(([, countA], [, countB]) => countB - countA) // Sort by count descending
+                      .map(([category, count]) => (
+                        <View key={category} style={styles.legendItem}>
+                          <View style={[styles.legendDot, { backgroundColor: getCategoryColor(category) }]} />
+                          <Text style={[styles.legendText, { color: theme.colors.text }]}>
+                            {category} ({count}) - {((count / totalCategoryCount) * 100).toFixed(1)}%
+                          </Text>
+                        </View>
+                    ))}
                   </View>
-                ))}
-              </View>
+                </View>
+              )
             ) : (
               <Text variant="bodyMedium" style={[styles.emptyText, { 
                 color: theme.colors.onSurfaceVariant || theme.colors.placeholder,
@@ -468,36 +576,98 @@ const StatisticsScreen: React.FC = () => {
               </Text>
             </View>
             
+            <View style={styles.chartTypeSelector}>
+              <SegmentedButtons
+                value={priorityChartType}
+                onValueChange={setPriorityChartType}
+                buttons={[
+                  {
+                    value: 'bar',
+                    icon: 'chart-bar',
+                    label: 'Bar'
+                  },
+                  {
+                    value: 'pie',
+                    icon: 'chart-pie',
+                    label: 'Pie'
+                  },
+                ]}
+              />
+            </View>
+            
             <Divider style={{ marginVertical: 12 }} />
             
             {Object.keys(priorityDistribution).length > 0 ? (
-              <View style={styles.priorityChipsContainer}>
-                {Object.entries(priorityDistribution).map(([priority, count]) => (
-                  <Chip
-                    key={priority}
-                    style={[styles.priorityChip, { 
-                      backgroundColor: getPriorityColor(priority) + '20',
-                      borderColor: getPriorityColor(priority),
-                      borderWidth: 1,
-                      marginRight: 8,
-                      marginBottom: 8
-                    }]}
-                    textStyle={{ 
-                      color: getPriorityColor(priority),
-                      fontWeight: '500'
-                    }}
-                    icon={() => (
-                      <Ionicons 
-                        name={getPriorityIcon(priority)} 
-                        size={16} 
-                        color={getPriorityColor(priority)} 
-                      />
+              priorityChartType === 'bar' ? (
+                <View style={styles.chartContainer}>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                    <BarChart
+                      data={priorityBarData}
+                      barWidth={30}
+                      spacing={24}
+                      roundedTop
+                      roundedBottom
+                      hideRules
+                      xAxisThickness={1}
+                      yAxisThickness={1}
+                      xAxisColor={theme.colors.outline}
+                      yAxisColor={theme.colors.outline}
+                      yAxisTextStyle={{ color: theme.colors.text }}
+                      xAxisLabelTextStyle={{ color: theme.colors.text, textAlign: 'center' }}
+                      noOfSections={5}
+                      maxValue={Math.max(...Object.values(priorityDistribution)) + 1}
+                      labelWidth={80}
+                      backgroundColor={theme.colors.surface}
+                      height={200}
+                      width={Math.max(300, Object.keys(priorityDistribution).length * 70)}
+                      showFractionalValues
+                      showGradient
+                      gradientColor={theme.colors.background}
+                    />
+                  </ScrollView>
+                </View>
+              ) : (
+                <View style={styles.chartContainer}>
+                  <PieChart
+                    data={priorityPieData}
+                    donut
+                    showGradient
+                    sectionAutoFocus
+                    radius={90}
+                    innerRadius={60}
+                    innerCircleColor={theme.colors.background}
+                    centerLabelComponent={() => (
+                      <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+                        <Text style={{ color: theme.colors.text, fontSize: 22, fontWeight: 'bold' }}>
+                          {totalPriorityCount}
+                        </Text>
+                        <Text style={{ color: theme.colors.onSurfaceVariant, fontSize: 12 }}>
+                          Total
+                        </Text>
+                      </View>
                     )}
-                  >
-                    {priority.charAt(0).toUpperCase() + priority.slice(1)}: {count}
-                  </Chip>
-                ))}
-              </View>
+                  />
+                  
+                  <View style={styles.legendContainer}>
+                    {Object.entries(priorityDistribution)
+                      .sort(([, countA], [, countB]) => countB - countA) // Sort by count descending
+                      .map(([priority, count]) => (
+                        <View key={priority} style={styles.legendItem}>
+                          <View style={styles.legendItemIcon}>
+                            <Ionicons 
+                              name={getPriorityIcon(priority)} 
+                              size={16} 
+                              color={getPriorityColor(priority)} 
+                            />
+                          </View>
+                          <Text style={[styles.legendText, { color: theme.colors.text }]}>
+                            {priority.charAt(0).toUpperCase() + priority.slice(1)} ({count}) - {((count / totalPriorityCount) * 100).toFixed(1)}%
+                          </Text>
+                        </View>
+                    ))}
+                  </View>
+                </View>
+              )
             ) : (
               <Text variant="bodyMedium" style={[styles.emptyText, { 
                 color: theme.colors.onSurfaceVariant || theme.colors.placeholder,
@@ -694,55 +864,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
   },
-  // Distribution styles
-  distributionContainer: {
-    marginVertical: 8,
-  },
-  distributionItem: {
-    marginBottom: 12,
-  },
-  distributionLabelContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  categoryDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    marginRight: 8,
-  },
-  distributionLabel: {
-    fontSize: 14,
-  },
-  distributionBarContainer: {
-    height: 24,
-    backgroundColor: 'rgba(0,0,0,0.05)',
-    borderRadius: 12,
-    overflow: 'hidden',
-  },
-  distributionBar: {
-    height: '100%',
-    borderRadius: 12,
-    justifyContent: 'center',
-    paddingHorizontal: 8,
-    minWidth: 40,
-  },
-  distributionPercentage: {
-    fontSize: 12,
-    textAlign: 'right',
-  },
-  // Priority styles
-  priorityChipsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginVertical: 8,
-  },
-  priorityChip: {
-    borderRadius: 16,
-    paddingVertical: 4,
-    paddingHorizontal: 8,
-  },
+
   // Weekly progress styles
   weeklyProgressContainer: {
     alignItems: 'center',
@@ -755,6 +877,40 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 14,
     lineHeight: 20,
+  },
+  // Chart type selector
+  chartTypeSelector: {
+    marginTop: 12,
+    marginBottom: 8,
+  },
+  // Chart container
+  chartContainer: {
+    marginVertical: 16,
+    alignItems: 'center',
+    paddingHorizontal: 8,
+  },
+  // Legend styles
+  legendContainer: {
+    width: '100%',
+    paddingHorizontal: 16,
+    marginTop: 16,
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  legendDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    marginRight: 8,
+  },
+  legendItemIcon: {
+    marginRight: 8,
+  },
+  legendText: {
+    fontSize: 14,
   },
 });
 

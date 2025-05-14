@@ -131,10 +131,12 @@ const createCustomNavigationTheme = (theme: any) => {
   };
 };
 
-// Enable LayoutAnimation on Android
+// Enable LayoutAnimation on Android - Breaks Icons?
+/*
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
+*/
 
 // Background component to prevent white flash
 const ScreenBackground = ({ children }: { children: React.ReactNode }) => {
