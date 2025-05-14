@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../utils/theme';
+import { View, Platform, UIManager, BackHandler } from 'react-native';
+import { useNavigation, useNavigationContainerRef } from '@react-navigation/native';
 
 // Import screens
 import OnboardingScreen from '../screens/OnboardingScreen';
@@ -28,7 +30,11 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<RootStackParamList>();
 
 // Main tab navigator
-const MainTabNavigator = () => {
+interface MainTabNavigatorProps {
+  navigationRef: any;
+}
+
+const MainTabNavigator: React.FC<MainTabNavigatorProps> = ({ navigationRef }) => {
   const theme = useTheme();
   
   return (
@@ -65,7 +71,31 @@ const MainTabNavigator = () => {
           fontWeight: '500',
         },
         tabBarHideOnKeyboard: true,
+        // Prevent white flash during tab transitions
+        tabBarBackground: () => (
+          <View style={{ flex: 1, backgroundColor: theme.colors.surface }} />
+        ),
+        // Disable animations to prevent white flash
+        lazy: false,
+        freezeOnBlur: true,
+        // Ensure screens are pre-rendered to prevent white flash
+        unmountOnBlur: false,
       })}
+      // Add background color to prevent white flash
+      sceneContainerStyle={{ 
+        backgroundColor: theme.colors.background,
+      }}
+      // Disable tab transition animations
+      screenListeners={{
+        tabPress: e => {
+          // Prevent default animation
+          e.preventDefault();
+          const target = e.target?.split('-')[0];
+          if (target) {
+            navigationRef.current?.navigate(target as any);
+          }
+        },
+      }}
     >
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Habits" component={HabitsScreen} />
@@ -101,14 +131,77 @@ const createCustomNavigationTheme = (theme: any) => {
   };
 };
 
+// Enable LayoutAnimation on Android
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
+
+// Background component to prevent white flash
+const ScreenBackground = ({ children }: { children: React.ReactNode }) => {
+  const theme = useTheme();
+  return (
+    <View style={{ 
+      flex: 1, 
+      backgroundColor: theme.colors.background,
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      zIndex: -1
+    }}>
+      {children}
+    </View>
+  );
+}
+
 // Root navigator
 const AppNavigator = () => {
   const { isFirstLaunch, isDarkMode } = useAppContext();
   const theme = useTheme();
   const navigationTheme = createCustomNavigationTheme(theme);
+  const navigationRef = useNavigationContainerRef();
+  
+  // Handle hardware back button to prevent white flash
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (navigationRef.current?.canGoBack()) {
+        navigationRef.current?.goBack();
+        return true;
+      }
+      return false;
+    });
+    
+    return () => backHandler.remove();
+  }, [navigationRef]);
   
   return (
-    <NavigationContainer theme={navigationTheme}>
+    <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
+      {/* Persistent background to prevent white flash */}
+      <ScreenBackground>
+        <View style={{ flex: 1 }} />
+      </ScreenBackground>
+      
+      <NavigationContainer 
+        ref={navigationRef}
+        theme={navigationTheme}
+        documentTitle={{
+          formatter: (options, route) => 
+            `${options?.title ?? route?.name} - Accountability Partner AI`
+        }}
+        onReady={() => {
+          // This helps ensure the navigation is fully ready before rendering
+          console.log('Navigation container is ready');
+        }}
+        // Prevent white flash during navigation
+        theme={{
+          ...navigationTheme,
+          colors: {
+            ...navigationTheme.colors,
+            background: theme.colors.background,
+          },
+        }}
+      >
       <Stack.Navigator
         initialRouteName={isFirstLaunch ? 'Onboarding' : 'Main'}
         screenOptions={{
@@ -117,10 +210,18 @@ const AppNavigator = () => {
           },
           headerTintColor: theme.colors.text,
           headerShadowVisible: false,
-          animation: 'slide_from_right',
+          animation: 'none', // Disable animation to prevent white flash
+          animationDuration: 0,
           contentStyle: {
             backgroundColor: theme.colors.background,
           },
+          // Prevent white flash during transitions
+          cardStyle: { backgroundColor: theme.colors.background },
+          cardOverlayEnabled: false,
+          presentation: 'card',
+          // Additional options to prevent white flash
+          detachPreviousScreen: false,
+          freezeOnBlur: true,
         }}
       >
         <Stack.Screen 
@@ -130,9 +231,10 @@ const AppNavigator = () => {
         />
         <Stack.Screen 
           name="Main" 
-          component={MainTabNavigator} 
           options={{ headerShown: false }}
-        />
+        >
+          {() => <MainTabNavigator navigationRef={navigationRef} />}
+        </Stack.Screen>
         <Stack.Screen 
           name="HabitDetails" 
           component={HabitDetailsScreen}
@@ -165,6 +267,7 @@ const AppNavigator = () => {
         />
       </Stack.Navigator>
     </NavigationContainer>
+    </View>
   );
 };
 

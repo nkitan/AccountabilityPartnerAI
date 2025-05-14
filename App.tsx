@@ -50,8 +50,10 @@ const Main = () => {
 
   return (
     <PaperProvider theme={theme}>
-      <StatusBar style={isDarkMode ? 'light' : 'dark'} />
-      <AppNavigator />
+      <StatusBar style={isDarkMode ? 'light' : 'dark'} translucent={false} backgroundColor={theme.colors.background} />
+      <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
+        <AppNavigator />
+      </View>
     </PaperProvider>
   );
 };
