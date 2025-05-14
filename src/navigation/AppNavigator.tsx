@@ -1,11 +1,12 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../utils/theme';
-import { View, Platform, UIManager, BackHandler } from 'react-native';
+import { View, Platform, UIManager, BackHandler, TouchableOpacity, StyleSheet, Animated } from 'react-native';
 import { useNavigation, useNavigationContainerRef } from '@react-navigation/native';
+import { Text } from 'react-native-paper';
 
 // Import screens
 import OnboardingScreen from '../screens/OnboardingScreen';
@@ -29,6 +30,174 @@ import { useAppContext } from '../context/AppContext';
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<RootStackParamList>();
 
+// Custom Tab Bar Button Component
+interface TabBarButtonProps {
+  label: string;
+  icon: keyof typeof Ionicons.glyphMap;
+  iconOutline: keyof typeof Ionicons.glyphMap;
+  isFocused: boolean;
+  onPress: () => void;
+}
+
+const TabBarButton: React.FC<TabBarButtonProps> = ({ 
+  label, 
+  icon, 
+  iconOutline, 
+  isFocused, 
+  onPress 
+}) => {
+  const theme = useTheme();
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+  const opacityAnim = useRef(new Animated.Value(isFocused ? 1 : 0)).current;
+  
+  useEffect(() => {
+    // Scale animation when tab is pressed
+    if (isFocused) {
+      Animated.sequence([
+        Animated.timing(scaleAnim, {
+          toValue: 1.2,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(scaleAnim, {
+          toValue: 1,
+          duration: 150,
+          useNativeDriver: true,
+        })
+      ]).start();
+      
+      // Fade in the label
+      Animated.timing(opacityAnim, {
+        toValue: 1,
+        duration: 200,
+        useNativeDriver: true,
+      }).start();
+    } else {
+      // Fade out the label
+      Animated.timing(opacityAnim, {
+        toValue: 0,
+        duration: 150,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [isFocused, scaleAnim, opacityAnim]);
+  
+  return (
+    <TouchableOpacity
+      activeOpacity={0.7}
+      onPress={onPress}
+      style={tabStyles.tabButton}
+    >
+      <View style={tabStyles.tabButtonContent}>
+        <View style={tabStyles.iconWrapper}>
+          <Animated.View
+            style={[
+              {
+                transform: [{ scale: scaleAnim }],
+                backgroundColor: isFocused 
+                  ? theme.dark 
+                    ? `${theme.colors.primary}40` 
+                    : `${theme.colors.primary}20`
+                  : 'transparent',
+                opacity: isFocused ? 1 : 0,
+              }
+            ]}
+          />
+          <Ionicons
+            name={isFocused ? icon : iconOutline}
+            size={24}
+            color={isFocused ? theme.colors.primary : theme.colors.outline}
+            style={tabStyles.icon}
+          />
+        </View>
+        
+        <Animated.View
+          style={[
+            tabStyles.labelContainer,
+            {
+              opacity: opacityAnim,
+              transform: [
+                { 
+                  translateY: opacityAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [5, 0]
+                  }) 
+                }
+              ]
+            }
+          ]}
+        >
+          <Text
+            style={[
+              tabStyles.label,
+              { color: theme.colors.primary }
+            ]}
+            numberOfLines={1}
+          >
+            {label}
+          </Text>
+        </Animated.View>
+      </View>
+    </TouchableOpacity>
+  );
+};
+
+// Custom Tab Bar Component
+const CustomTabBar = ({ state, descriptors, navigation }: any) => {
+  const theme = useTheme();
+  
+  // Define icon mapping
+  const iconMapping = {
+    Home: { icon: 'home', outline: 'home-outline' },
+    Habits: { icon: 'list', outline: 'list-outline' },
+    Chat: { icon: 'chatbubble', outline: 'chatbubble-outline' },
+    Statistics: { icon: 'stats-chart', outline: 'stats-chart-outline' },
+    Profile: { icon: 'person', outline: 'person-outline' },
+  };
+  
+  return (
+    <View style={[
+      tabStyles.tabBar,
+      { 
+        backgroundColor: theme.colors.surface,
+        borderTopColor: theme.dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+      }
+    ]}>
+      {state.routes.map((route: any, index: number) => {
+        const { options } = descriptors[route.key];
+        const label = options.tabBarLabel || route.name;
+        const isFocused = state.index === index;
+        
+        const onPress = () => {
+          const event = navigation.emit({
+            type: 'tabPress',
+            target: route.key,
+            canPreventDefault: true,
+          });
+          
+          if (!isFocused && !event.defaultPrevented) {
+            navigation.navigate(route.name);
+          }
+        };
+        
+        const routeName = route.name as keyof typeof iconMapping;
+        const { icon, outline } = iconMapping[routeName];
+        
+        return (
+          <TabBarButton
+            key={index}
+            label={label}
+            icon={icon as keyof typeof Ionicons.glyphMap}
+            iconOutline={outline as keyof typeof Ionicons.glyphMap}
+            isFocused={isFocused}
+            onPress={onPress}
+          />
+        );
+      })}
+    </View>
+  );
+};
+
 // Main tab navigator
 interface MainTabNavigatorProps {
   navigationRef: any;
@@ -39,63 +208,17 @@ const MainTabNavigator: React.FC<MainTabNavigatorProps> = ({ navigationRef }) =>
   
   return (
     <Tab.Navigator
-      screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused, color, size }) => {
-          let iconName: keyof typeof Ionicons.glyphMap = 'home';
-          
-          if (route.name === 'Home') {
-            iconName = focused ? 'home' : 'home-outline';
-          } else if (route.name === 'Habits') {
-            iconName = focused ? 'list' : 'list-outline';
-          } else if (route.name === 'Chat') {
-            iconName = focused ? 'chatbubble' : 'chatbubble-outline';
-          } else if (route.name === 'Profile') {
-            iconName = focused ? 'person' : 'person-outline';
-          } else if (route.name === 'Statistics') {
-            iconName = focused ? 'stats-chart' : 'stats-chart-outline';
-          }
-          
-          return <Ionicons name={iconName} size={size} color={color} />;
-        },
-        tabBarActiveTintColor: theme.colors.primary,
-        tabBarInactiveTintColor: theme.colors.outline,
+      screenOptions={{
         headerShown: false,
-        tabBarStyle: {
-          backgroundColor: theme.colors.surface,
-          borderTopColor: theme.colors.outline,
-          elevation: 0,
-          shadowOpacity: 0,
-        },
-        tabBarLabelStyle: {
-          fontSize: 12,
-          fontWeight: '500',
-        },
         tabBarHideOnKeyboard: true,
-        // Prevent white flash during tab transitions
-        tabBarBackground: () => (
-          <View style={{ flex: 1, backgroundColor: theme.colors.surface }} />
-        ),
-        // Disable animations to prevent white flash
         lazy: false,
         freezeOnBlur: true,
-        // Ensure screens are pre-rendered to prevent white flash
         unmountOnBlur: false,
-      })}
-      // Add background color to prevent white flash
+      }}
       sceneContainerStyle={{ 
         backgroundColor: theme.colors.background,
       }}
-      // Disable tab transition animations
-      screenListeners={{
-        tabPress: e => {
-          // Prevent default animation
-          e.preventDefault();
-          const target = e.target?.split('-')[0];
-          if (target) {
-            navigationRef.current?.navigate(target as any);
-          }
-        },
-      }}
+      tabBar={props => <CustomTabBar {...props} />}
     >
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Habits" component={HabitsScreen} />
@@ -272,5 +395,60 @@ const AppNavigator = () => {
     </View>
   );
 };
+
+// Tab bar styles
+const tabStyles = StyleSheet.create({
+  tabBar: {
+    flexDirection: 'row',
+    height: Platform.OS === 'ios' ? 85 : 65,
+    paddingBottom: Platform.OS === 'ios' ? 25 : 5,
+    borderTopWidth: 1,
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+  },
+  tabButton: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  tabButtonContent: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: '100%',
+  },
+  iconWrapper: {
+    width: 48,
+    height: 48,
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+  },
+  iconBackground: {
+    position: 'absolute',
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    top: 0,
+    left: 0,
+  },
+  icon: {
+    zIndex: 2,
+  },
+  labelContainer: {
+    position: 'absolute',
+    bottom: -2,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 10,
+  },
+  label: {
+    fontSize: 11,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+});
 
 export default AppNavigator;

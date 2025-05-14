@@ -225,15 +225,14 @@ const ChatScreen: React.FC = () => {
         <View style={{ maxWidth: '80%' }}>
           {/* Message bubble with modern styling */}
           {isAI ? (
-            <Surface 
+            <View 
               style={[
                 styles.messageBubble,
                 getBubbleStyle(),
                 { 
                   backgroundColor: theme.dark 
                     ? 'rgba(103, 80, 164, 0.2)' 
-                    : 'rgba(103, 80, 164, 0.08)',
-                  elevation: 0
+                    : 'rgba(103, 80, 164, 0.08)'
                 }
               ]}
             >
@@ -257,7 +256,7 @@ const ChatScreen: React.FC = () => {
                   minute: '2-digit' 
                 })}
               </Text>
-            </Surface>
+            </View>
           ) : (
             <LinearGradient
               colors={[theme.colors.primary, theme.colors.primaryAction]}

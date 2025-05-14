@@ -5,7 +5,11 @@ import {
   ScrollView, 
   TouchableOpacity, 
   Image,
-  RefreshControl
+  RefreshControl,
+  Animated,
+  Dimensions,
+  StatusBar,
+  Platform
 } from 'react-native';
 import { 
   useTheme, 
@@ -16,7 +20,8 @@ import {
   Divider,
   IconButton,
   ProgressBar,
-  Chip
+  Chip,
+  Surface
 } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -26,8 +31,11 @@ import { Ionicons } from '@expo/vector-icons';
 import AIPartnerService from '../services/AIPartnerService';
 import 'react-native-get-random-values'; // This must be imported before uuid
 import { v4 as uuidv4 } from 'uuid';
+import { LinearGradient } from 'expo-linear-gradient';
 
 type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Main'>;
+
+const { width, height } = Dimensions.get('window');
 
 const HomeScreen: React.FC = () => {
   const theme = useTheme();
@@ -48,6 +56,19 @@ const HomeScreen: React.FC = () => {
   const [todayMessage, setTodayMessage] = useState<AIMessage | null>(null);
   const [todayHabits, setTodayHabits] = useState<Habit[]>([]);
   const [completedToday, setCompletedToday] = useState(0);
+  
+  // Animation values
+  const scrollY = new Animated.Value(0);
+  const headerOpacity = scrollY.interpolate({
+    inputRange: [0, 100],
+    outputRange: [1, 0.9],
+    extrapolate: 'clamp',
+  });
+  const headerTranslate = scrollY.interpolate({
+    inputRange: [0, 100],
+    outputRange: [0, -20],
+    extrapolate: 'clamp',
+  });
 
   // Get today's date in YYYY-MM-DD format
   const today = new Date().toISOString().split('T')[0];
@@ -254,10 +275,14 @@ const HomeScreen: React.FC = () => {
   const renderHabitCard = (habit: Habit) => {
     const isCompleted = habit.completedDates.includes(today);
     
-    // Determine priority color (assuming habit has a priority property, or defaulting to 'medium')
+    // Determine priority color
     const priorityColor = habit.priority === 'high' ? theme.colors.priorityHigh : 
                          habit.priority === 'low' ? theme.colors.priorityLow : 
                          theme.colors.priorityMedium;
+    
+    // Get priority icon
+    const priorityIcon = habit.priority === 'high' ? "flash" : 
+                        habit.priority === 'medium' ? "alert-circle" : "leaf";
     
     return (
       <Card 
@@ -266,10 +291,10 @@ const HomeScreen: React.FC = () => {
           styles.habitCard, 
           { 
             backgroundColor: theme.colors.cardBackground,
-            borderColor: theme.colors.outline,
+            borderRadius: theme.roundness * 2,
+            borderLeftWidth: 4,
             borderLeftColor: habit.color || priorityColor,
-            borderLeftWidth: 5,
-            borderRadius: theme.roundness * 2
+            marginBottom: 12
           }
         ]}
         onPress={() => navigation.navigate('HabitDetails', { habitId: habit.id })}
@@ -277,50 +302,46 @@ const HomeScreen: React.FC = () => {
         <Card.Content style={styles.habitCardContent}>
           <View style={styles.habitCardHeader}>
             <View style={styles.habitTitleContainer}>
-              <Text variant="titleLarge" style={{ color: theme.colors.text }}>{habit.title}</Text>
+              <Text variant="titleMedium" style={{ color: theme.colors.text, fontWeight: '600' }}>
+                {habit.title}
+              </Text>
               <View style={styles.habitMetaContainer}>
-                <Text variant="bodyMedium" style={{ color: theme.colors.placeholder, marginRight: 8 }}>{habit.category}</Text>
+                <Chip 
+                  style={{ backgroundColor: 'rgba(3, 169, 244, 0.1)', marginRight: 8 }}
+                  textStyle={{ color: theme.colors.info, fontSize: 12 }}
+                >
+                  {habit.category || 'General'}
+                </Chip>
+                
                 {habit.priority && (
                   <Chip 
-                    style={[
-                      styles.priorityChip, 
-                      { 
-                        backgroundColor: 
-                          habit.priority === 'high' 
-                            ? 'rgba(255, 87, 34, 0.2)' 
-                            : habit.priority === 'medium'
-                              ? 'rgba(255, 193, 7, 0.2)'
-                              : 'rgba(76, 175, 80, 0.2)',
-                        height: 32,
-                        width: 'auto'
-                      }
-                    ]}
+                    style={{ 
+                      backgroundColor: 
+                        habit.priority === 'high' 
+                          ? 'rgba(255, 87, 34, 0.1)' 
+                          : habit.priority === 'medium'
+                            ? 'rgba(255, 193, 7, 0.1)'
+                            : 'rgba(76, 175, 80, 0.1)',
+                    }}
                     textStyle={{ 
                       color: 
                         habit.priority === 'high' 
-                          ? theme.colors.priorityHigh || '#FF5722' 
+                          ? theme.colors.priorityHigh
                           : habit.priority === 'medium'
-                            ? theme.colors.priorityMedium || '#FFC107'
-                            : theme.colors.priorityLow || '#4CAF50',
-                      fontSize: 12,
-                      fontWeight: '500'
+                            ? theme.colors.priorityMedium
+                            : theme.colors.priorityLow,
+                      fontSize: 12
                     }}
                     icon={() => (
                       <Ionicons 
-                        name={
-                          habit.priority === 'high' 
-                            ? "flash" 
-                            : habit.priority === 'medium'
-                              ? "alert"
-                              : "leaf"
-                        }
+                        name={priorityIcon}
                         size={14} 
                         color={
                           habit.priority === 'high' 
-                            ? theme.colors.priorityHigh || '#FF5722' 
+                            ? theme.colors.priorityHigh
                             : habit.priority === 'medium'
-                              ? theme.colors.priorityMedium || '#FFC107'
-                              : theme.colors.priorityLow || '#4CAF50'
+                              ? theme.colors.priorityMedium
+                              : theme.colors.priorityLow
                         }
                       />
                     )}
@@ -335,8 +356,19 @@ const HomeScreen: React.FC = () => {
               style={[
                 styles.completeButton, 
                 { 
-                  backgroundColor: isCompleted ? theme.colors.taskCompleteBackground : theme.colors.surface,
-                  borderColor: isCompleted ? theme.colors.success : theme.colors.primaryAction,
+                  backgroundColor: isCompleted 
+                    ? theme.colors.successContainer 
+                    : 'rgba(33, 150, 243, 0.1)',
+                  borderColor: isCompleted 
+                    ? theme.colors.success 
+                    : theme.colors.primaryAction,
+                  borderWidth: 1,
+                  borderRadius: 20,
+                  paddingHorizontal: 12,
+                  paddingVertical: 8,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  minWidth: 100
                 }
               ]}
               onPress={() => handleCompleteHabit(habit)}
@@ -352,7 +384,7 @@ const HomeScreen: React.FC = () => {
           
           <View style={styles.streakContainer}>
             <Ionicons name="flame" size={18} color={theme.colors.streak} />
-            <Text style={[styles.streakText, { color: theme.colors.text }]}>
+            <Text style={{ marginLeft: 5, color: theme.colors.text }}>
               {habit.streakCount} day streak
             </Text>
           </View>
@@ -362,209 +394,280 @@ const HomeScreen: React.FC = () => {
   };
 
   return (
-    <ScrollView 
-      style={[styles.container, { backgroundColor: theme.colors.background }]}
-      contentContainerStyle={styles.contentContainer}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }
-    >
-      {/* Header with greeting and profile */}
-      <View style={styles.header}>
-        <View>
-          <Text style={[styles.greeting, { color: theme.colors.text }]}>
-            Hello, {user?.name || 'Friend'}
-          </Text>
-          <Text style={[styles.date, { color: theme.colors.placeholder }]}>
-            {new Date().toLocaleDateString('en-US', { 
-              weekday: 'long', 
-              month: 'long', 
-              day: 'numeric' 
-            })}
-          </Text>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <StatusBar 
+        backgroundColor="transparent" 
+        translucent={true} 
+        barStyle={theme.dark ? 'light-content' : 'dark-content'} 
+      />
+      
+      <ScrollView 
+        style={{ flex: 1 }}
+        contentContainerStyle={styles.contentContainer}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
+        {/* Header with greeting and profile */}
+        <View style={styles.header}>
+          <View>
+            <Text style={[styles.greeting, { color: theme.colors.text }]}>
+              Hello, {user?.name || 'Friend'}
+            </Text>
+            <Text style={[styles.date, { color: theme.colors.placeholder }]}>
+              {new Date().toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                month: 'long', 
+                day: 'numeric' 
+              })}
+            </Text>
+          </View>
+          
+          <TouchableOpacity 
+            onPress={() => navigation.navigate('Profile')}
+            style={styles.profileButton}
+          >
+            <Avatar.Text 
+              size={50} 
+              label={user?.name?.substring(0, 2).toUpperCase() || 'U'} 
+              backgroundColor={theme.colors.primary}
+            />
+            <View style={[styles.badgeContainer, { backgroundColor: theme.colors.reward }]}>
+              <Ionicons name="star" size={14} color="#fff" />
+              <Text style={styles.badgeText}>{user?.virtualCurrency || 0}</Text>
+            </View>
+          </TouchableOpacity>
         </View>
         
-        <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
-          <Avatar.Text 
-            size={50} 
-            label={user?.name?.substring(0, 2).toUpperCase() || 'U'} 
-            backgroundColor={theme.colors.primary}
-          />
-        </TouchableOpacity>
-      </View>
-      
-      {/* Progress summary */}
-      <Card style={[styles.progressCard, { 
-        backgroundColor: theme.colors.cardBackground,
-        borderRadius: theme.roundness * 3
-      }]}>
-        <Card.Content>
-          <View style={styles.progressHeader}>
-            <Text variant="titleLarge" style={{ color: theme.colors.text }}>Today's Progress</Text>
-            <View style={styles.currencyContainer}>
-              <Ionicons name="star" size={18} color={theme.colors.reward} />
-              <Text style={[styles.currencyText, { color: theme.colors.text }]}>
-                {user?.virtualCurrency || 0}
+        {/* Progress summary */}
+        <Card style={[styles.progressCard, { 
+          backgroundColor: theme.colors.cardBackground,
+          borderRadius: theme.roundness * 3,
+        }]}>
+          <Card.Content>
+            <View style={styles.progressHeader}>
+              <Text variant="titleLarge" style={{ color: theme.colors.text, fontWeight: 'bold' }}>
+                Today's Progress
               </Text>
             </View>
-          </View>
-          
-          <View style={styles.progressBarContainer}>
-            <ProgressBar 
-              progress={todayHabits.length > 0 ? completedToday / todayHabits.length : 0} 
-              color={theme.colors.primaryAction}
-              style={styles.progressBar}
-            />
-            <Text style={[styles.progressText, { color: theme.colors.text }]}>
-              {completedToday}/{todayHabits.length} habits completed
-            </Text>
-          </View>
-          
-          <View style={styles.streakSummary}>
-            <Ionicons name="flame" size={24} color={theme.colors.streak} />
-            <Text style={[styles.streakSummaryText, { color: theme.colors.text }]}>
-              {user?.streakCount || 0} day streak
-            </Text>
-          </View>
-        </Card.Content>
-      </Card>
-      
-      {/* AI Partner message */}
-      {todayMessage && (
-        <Card 
-          style={[styles.messageCard, { 
-            backgroundColor: theme.colors.infoContainer,
-            borderRadius: theme.roundness * 3
-          }]}
-          onPress={navigateToChat}
-        >
-          <Card.Content style={styles.messageCardContent}>
-            <View style={styles.messageHeader}>
-              <Avatar.Icon 
-                size={40} 
-                icon="robot" 
-                backgroundColor={theme.colors.primaryAction}
-                color="#fff"
+            
+            <View style={styles.progressBarContainer}>
+              <ProgressBar 
+                progress={todayHabits.length > 0 ? completedToday / todayHabits.length : 0} 
+                color={theme.colors.primaryAction}
+                style={styles.progressBar}
               />
-              <Text style={[styles.messageTitle, { color: theme.colors.primaryAction }]}>
-                Your Accountability Partner
+              <Text style={[styles.progressText, { color: theme.colors.text }]}>
+                {completedToday}/{todayHabits.length} habits completed
               </Text>
             </View>
             
-            <Text variant="bodyMedium" style={[styles.messageText, { color: theme.colors.text }]}>
-              {todayMessage.content}
-            </Text>
-            
-            <Button 
-              mode="text" 
-              onPress={navigateToChat}
-              style={styles.chatButton}
-              labelStyle={{ color: theme.colors.primaryAction }}
-            >
-              Continue Chat
-            </Button>
+            <View style={styles.progressStatsContainer}>
+              <View style={styles.progressStat}>
+                <Text style={[styles.progressStatValue, { color: theme.colors.text, fontWeight: 'bold' }]}>
+                  {completedToday}
+                </Text>
+                <Text style={[styles.progressStatLabel, { color: theme.colors.placeholder }]}>
+                  Completed
+                </Text>
+              </View>
+              
+              <View style={styles.progressStat}>
+                <Text style={[styles.progressStatValue, { color: theme.colors.text, fontWeight: 'bold' }]}>
+                  {todayHabits.length - completedToday}
+                </Text>
+                <Text style={[styles.progressStatLabel, { color: theme.colors.placeholder }]}>
+                  Remaining
+                </Text>
+              </View>
+              
+              <View style={styles.progressStat}>
+                <View style={styles.streakSummary}>
+                  <Ionicons name="flame" size={20} color={theme.colors.streak} />
+                  <Text style={[styles.streakSummaryText, { color: theme.colors.text, fontWeight: 'bold' }]}>
+                    {user?.streakCount || 0}
+                  </Text>
+                </View>
+                <Text style={[styles.progressStatLabel, { color: theme.colors.placeholder }]}>
+                  Day Streak
+                </Text>
+              </View>
+            </View>
           </Card.Content>
         </Card>
-      )}
-      
-      {/* Today's habits */}
-      <View style={styles.habitsSection}>
-        <View style={styles.sectionHeader}>
-          <Text variant="titleLarge" style={{ color: theme.colors.text }}>Today's Habits</Text>
-          <Button 
-            mode="text" 
-            onPress={() => navigation.navigate('Habits')}
-            labelStyle={{ color: theme.colors.primary }}
-          >
-            See All
-          </Button>
-        </View>
         
-        {todayHabits.length > 0 ? (
-          todayHabits.map(habit => renderHabitCard(habit))
-        ) : (
-          <Card style={[styles.emptyCard, { 
-            backgroundColor: theme.colors.cardBackground,
-            borderRadius: theme.roundness * 2
-          }]}>
-            <Card.Content style={styles.emptyCardContent}>
-              <Ionicons name="calendar-outline" size={40} color={theme.colors.placeholder} />
-              <Text variant="bodyMedium" style={[styles.emptyText, { color: theme.colors.placeholder }]}>
-                No habits scheduled for today
-              </Text>
-              <Button 
-                mode="contained" 
-                onPress={navigateToAddHabit}
-                style={[styles.addButton, { 
-                  backgroundColor: theme.colors.primaryAction,
-                  borderRadius: theme.roundness * 5
-                }]}
-              >
-                Add a Habit
-              </Button>
+        {/* AI Partner message */}
+        {todayMessage && (
+          <Card 
+            style={[styles.messageCard, { 
+              backgroundColor: theme.colors.cardBackground,
+              borderRadius: theme.roundness * 3,
+            }]}
+            onPress={navigateToChat}
+          >
+            <Card.Content>
+              <View style={styles.messageHeader}>
+                <Avatar.Icon 
+                  size={46} 
+                  icon="robot" 
+                  backgroundColor={theme.colors.primaryAction}
+                  color="#fff"
+                />
+                <View style={styles.messageTitleContainer}>
+                  <Text style={[styles.messageTitle, { color: theme.colors.text, fontWeight: 'bold' }]}>
+                    Your Accountability Partner
+                  </Text>
+                  <Text style={[styles.messageSubtitle, { color: theme.colors.placeholder }]}>
+                    Daily Motivation
+                  </Text>
+                </View>
+              </View>
+              
+              <View style={styles.messageContent}>
+                <Text variant="bodyMedium" style={[styles.messageText, { color: theme.colors.text }]}>
+                  {todayMessage.content}
+                </Text>
+              </View>
+              
+              <View style={styles.messageActions}>
+                <Button 
+                  mode="contained" 
+                  onPress={navigateToChat}
+                  style={[styles.chatButton, { backgroundColor: theme.colors.primaryAction }]}
+                  icon="chat"
+                >
+                  Continue Chat
+                </Button>
+              </View>
             </Card.Content>
           </Card>
         )}
-      </View>
+        
+        {/* Today's habits */}
+        <View style={styles.habitsSection}>
+          <View style={styles.sectionHeader}>
+            <View>
+              <Text variant="titleLarge" style={[styles.sectionTitle, { color: theme.colors.text, fontWeight: 'bold' }]}>
+                Today's Habits
+              </Text>
+              <Text variant="bodySmall" style={{ color: theme.colors.placeholder }}>
+                {todayHabits.length} {todayHabits.length === 1 ? 'habit' : 'habits'} scheduled
+              </Text>
+            </View>
+            
+            <Button 
+              mode="text" 
+              onPress={() => navigation.navigate('Habits')}
+              labelStyle={{ color: theme.colors.primary }}
+            >
+              See All
+            </Button>
+          </View>
+          
+          {todayHabits.length > 0 ? (
+            <View>
+              {todayHabits.map(habit => renderHabitCard(habit))}
+            </View>
+          ) : (
+            <Card style={[styles.emptyCard, { backgroundColor: theme.colors.cardBackground }]}>
+              <Card.Content style={styles.emptyCardContent}>
+                <Ionicons name="calendar-outline" size={40} color={theme.colors.placeholder} />
+                <Text variant="titleMedium" style={[styles.emptyTitle, { color: theme.colors.text }]}>
+                  No habits for today
+                </Text>
+                <Text variant="bodyMedium" style={[styles.emptyText, { color: theme.colors.placeholder }]}>
+                  Create a new habit to start building consistency
+                </Text>
+                <Button 
+                  mode="contained" 
+                  onPress={navigateToAddHabit}
+                  style={[styles.addButton, { backgroundColor: theme.colors.primaryAction }]}
+                  icon="plus"
+                >
+                  Add a Habit
+                </Button>
+              </Card.Content>
+            </Card>
+          )}
+        </View>
+      </ScrollView>
       
-      {/* Add habit button */}
+      {/* Add habit floating button */}
       {todayHabits.length > 0 && (
         <Button 
           mode="contained" 
           onPress={navigateToAddHabit}
-          style={[styles.floatingButton, { 
-            backgroundColor: theme.colors.primaryAction,
-            borderRadius: theme.roundness * 7
-          }]}
+          style={[styles.floatingButton, { backgroundColor: theme.colors.primaryAction }]}
           icon="plus"
         >
           Add Habit
         </Button>
       )}
-    </ScrollView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    position: 'relative',
   },
   contentContainer: {
     padding: 16,
-    paddingBottom: 80,
+    paddingTop: Platform.OS === 'ios' ? 60 : 40,
+    paddingBottom: 100,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 24,
+    paddingTop: Platform.OS === 'ios' ? 10 : 0,
   },
   greeting: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
+    marginBottom: 4,
   },
   date: {
     fontSize: 16,
   },
+  profileButton: {
+    position: 'relative',
+  },
+  badgeContainer: {
+    position: 'absolute',
+    bottom: -5,
+    right: -5,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+  },
+  badgeText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: 'bold',
+    marginLeft: 2,
+  },
+  
+  // Progress card styles
   progressCard: {
     marginBottom: 20,
-    borderRadius: 12,
+    borderRadius: 16,
     elevation: 2,
   },
   progressHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 10,
-  },
-  currencyContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  currencyText: {
-    marginLeft: 5,
-    fontSize: 16,
-    fontWeight: 'bold',
+    marginBottom: 16,
   },
   progressBarContainer: {
     marginVertical: 10,
@@ -577,42 +680,72 @@ const styles = StyleSheet.create({
     marginTop: 5,
     textAlign: 'center',
   },
+  progressStatsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  progressStat: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  progressStatValue: {
+    fontSize: 20,
+    marginBottom: 4,
+  },
+  progressStatLabel: {
+    fontSize: 12,
+  },
   streakSummary: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 10,
   },
   streakSummaryText: {
     marginLeft: 5,
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontSize: 20,
   },
+  
+  // Message card styles
   messageCard: {
     marginBottom: 20,
-    borderRadius: 12,
-  },
-  messageCardContent: {
-    padding: 5,
+    borderRadius: 16,
+    elevation: 2,
   },
   messageHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 16,
+  },
+  messageTitleContainer: {
+    flex: 1,
+    marginLeft: 12,
   },
   messageTitle: {
-    marginLeft: 10,
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontSize: 18,
+    marginBottom: 2,
+  },
+  messageSubtitle: {
+    fontSize: 14,
+  },
+  messageContent: {
+    marginBottom: 16,
   },
   messageText: {
     fontSize: 16,
     lineHeight: 24,
   },
-  chatButton: {
-    alignSelf: 'flex-end',
-    marginTop: 10,
+  messageActions: {
+    alignItems: 'flex-end',
   },
+  chatButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  
+  // Habits section styles
   habitsSection: {
     marginBottom: 20,
   },
@@ -620,80 +753,78 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 16,
   },
+  sectionTitle: {
+    fontSize: 20,
+    marginBottom: 4,
+  },
+  
+  // Habit card styles
   habitCard: {
     marginBottom: 12,
     borderRadius: 12,
-    borderWidth: 1,
+    elevation: 2,
   },
   habitCardContent: {
-    padding: 5,
+    padding: 12,
   },
   habitCardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
+    marginBottom: 12,
   },
   habitTitleContainer: {
     flex: 1,
+    marginRight: 12,
   },
   habitMetaContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 4,
-  },
-  priorityChip: {
-    borderRadius: 12,
-    paddingVertical: 2,
-    paddingHorizontal: 4,
-    minWidth: 32,
-    minHeight: 32,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginLeft: 4,
-  },
-  completeButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 20,
-    borderWidth: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    minWidth: 100,
+    flexWrap: 'wrap',
+    marginTop: 8,
   },
   streakContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 5,
+    marginTop: 8,
   },
-  streakText: {
-    marginLeft: 5,
-    fontSize: 14,
-  },
+  
+  // Empty state styles
   emptyCard: {
-    borderRadius: 12,
+    borderRadius: 16,
     marginBottom: 20,
+    elevation: 2,
   },
   emptyCardContent: {
     alignItems: 'center',
     padding: 30,
   },
+  emptyTitle: {
+    fontSize: 18,
+    marginBottom: 8,
+    textAlign: 'center',
+    marginTop: 16,
+  },
   emptyText: {
-    marginTop: 10,
-    marginBottom: 20,
     fontSize: 16,
     textAlign: 'center',
+    marginBottom: 20,
   },
   addButton: {
     borderRadius: 20,
+    marginTop: 10,
   },
+  
+  // Floating button styles
   floatingButton: {
     position: 'absolute',
     bottom: 20,
     right: 20,
     borderRadius: 30,
     paddingHorizontal: 20,
+    elevation: 4,
   },
 });
 
