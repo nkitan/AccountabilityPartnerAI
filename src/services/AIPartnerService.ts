@@ -1,5 +1,5 @@
 import { Habit, CheckIn, AIMessage, UserMessage } from '../types';
-import { v4 as uuidv4 } from 'uuid';
+import { v7 as uuidv7 } from 'uuid';
 
 // This is a mock AI service that simulates AI responses
 // In a real app, this would connect to an actual AI service
@@ -15,7 +15,7 @@ class AIPartnerService {
     ];
 
     return {
-      id: uuidv4(),
+      id: uuidv7(),
       content: welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)],
       timestamp: new Date().toISOString(),
       type: 'encouragement',
@@ -47,7 +47,7 @@ class AIPartnerService {
       ];
       
       return {
-        id: uuidv4(),
+        id: uuidv7(),
         content: genericResponses[Math.floor(Math.random() * genericResponses.length)],
         timestamp: new Date().toISOString(),
         type: 'feedback',
@@ -66,7 +66,7 @@ class AIPartnerService {
     ];
 
     return {
-      id: uuidv4(),
+      id: uuidv7(),
       content: reminderMessages[Math.floor(Math.random() * reminderMessages.length)],
       timestamp: new Date().toISOString(),
       type: 'reminder',
@@ -95,7 +95,7 @@ class AIPartnerService {
     }
 
     return {
-      id: uuidv4(),
+      id: uuidv7(),
       content: message,
       timestamp: new Date().toISOString(),
       type: 'encouragement',
@@ -125,7 +125,7 @@ class AIPartnerService {
     }
 
     return {
-      id: uuidv4(),
+      id: uuidv7(),
       content: message,
       timestamp: new Date().toISOString(),
       type: 'celebration',
@@ -154,7 +154,7 @@ class AIPartnerService {
     }
 
     return {
-      id: uuidv4(),
+      id: uuidv7(),
       content: message,
       timestamp: new Date().toISOString(),
       type: 'feedback',
@@ -187,7 +187,7 @@ class AIPartnerService {
     }
 
     return {
-      id: uuidv4(),
+      id: uuidv7(),
       content: message,
       timestamp: new Date().toISOString(),
       type: 'challenge',
@@ -208,7 +208,7 @@ class AIPartnerService {
     ];
 
     return {
-      id: uuidv4(),
+      id: uuidv7(),
       content: adviceMessages[Math.floor(Math.random() * adviceMessages.length)],
       timestamp: new Date().toISOString(),
       type: 'feedback',
@@ -226,7 +226,7 @@ class AIPartnerService {
     ];
 
     return {
-      id: uuidv4(),
+      id: uuidv7(),
       content: goalMessages[Math.floor(Math.random() * goalMessages.length)],
       timestamp: new Date().toISOString(),
       type: 'feedback',
@@ -301,7 +301,7 @@ class AIPartnerService {
     }
 
     return {
-      id: uuidv4(),
+      id: uuidv7(),
       content: message,
       timestamp: new Date().toISOString(),
       type: 'feedback',
