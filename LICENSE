@@ -1,0 +1,99 @@
+### **The Non-Commercial General Public License, Version 1 (NC-GPL v1)**
+
+**Preamble**
+
+This license is designed to ensure that software and its derivatives remain permanently open and freely available for non-commercial purposes. It is based on the principles of the GNU General Public License, aiming to guarantee the freedom to share and change the covered work, but with the explicit restriction that the work cannot be used for commercial gain.
+
+This license grants recipients of a program the rights to run, study, copy, modify, and redistribute the work and any modified versions. However, it strictly forbids any use of the work that is primarily intended for or directed toward commercial advantage or monetary compensation. By protecting the work from commercial exploitation, we hope to foster a community of collaboration and sharing for academic, hobbyist, and community-oriented projects.
+
+The precise terms and conditions for copying, distribution, and modification follow.
+
+**TERMS AND CONDITIONS**
+
+**0\. Definitions.**
+
+"This License" refers to version 1 of the Non-Commercial General Public License.
+
+"Copyright" also means copyright-like laws that apply to other kinds of works, such as semiconductor masks.
+
+"The Program" refers to any copyrightable work licensed under this License. Each licensee is addressed as "you". "Licensees" and "recipients" may be individuals or organizations.
+
+To "modify" a work means to copy from or adapt all or part of the work in a fashion requiring copyright permission, other than the making of an exact copy. The resulting work is called a "modified version" of the earlier work or a work "based on" the earlier work.
+
+A "covered work" means either the unmodified Program or a work based on the Program.
+
+To "propagate" a work means to do anything with it that, without permission, would make you directly or secondarily liable for infringement under applicable copyright law, except executing it on a computer or modifying a private copy. Propagation includes copying, distribution (with or without modification), making available to the public, and in some countries other activities as well.
+
+To "convey" a work means any kind of propagation that enables other parties to make or receive copies. Mere interaction with a user through a computer network, with no transfer of a copy, is not conveying.
+
+"Commercial Use" is defined as any use of the Program, or a work based on it, that is primarily intended for or directed toward commercial advantage or monetary compensation. This includes, but is not limited to:  
+a) Selling, licensing, or renting the Program or a covered work.  
+b) Using the Program or a covered work to provide a commercial service, including as "Software as a Service" (SaaS).  
+c) Incorporating the Program or a covered work into a product that is sold or for which a fee is charged.  
+d) Using the Program or a covered work for the internal operations of a for-profit business or entity.  
+e) Using the Program or a covered work to generate advertising revenue.  
+f) Providing paid support, consulting, or training services for the Program or a covered work.  
+**"Non-Commercial Use"** is defined as any use that is not Commercial Use. Use by registered non-profit organizations for their core non-profit activities, use for academic research and teaching, and personal or hobbyist use without the intent of generating revenue are considered Non-Commercial Use.
+
+**1\. Basic Permissions.**
+
+All rights granted under this License are granted for the term of copyright on the Program, and are irrevocable provided the stated conditions are met. This License explicitly affirms your unlimited permission to run the unmodified Program for any **Non-Commercial Use**. You may make, run and propagate covered works that you do not convey, without conditions so long as your license otherwise remains in force. You may convey covered works to others for the sole purpose of having them make modifications exclusively for you, or provide you with facilities for running those works, provided that you comply with the terms of this License in conveying all material for which you do not control copyright.
+
+**2\. Conveying Verbatim Copies.**
+
+You may convey verbatim copies of the Program's source code as you receive it, in any medium, provided that you conspicuously and appropriately publish on each copy an appropriate copyright notice; keep intact all notices stating that this License and any non-permissive terms added in accord with section 6 apply to the code; keep intact all notices of the absence of any warranty; and give all recipients a copy of this License along with the Program.
+
+**3\. Conveying Modified Source Versions.**
+
+You may convey a work based on the Program, or the modifications to produce it from the Program, in the form of source code under the terms of section 2, provided that you also meet all of these conditions:  
+a) The work must carry prominent notices stating that you modified it, and giving a relevant date.  
+b) The work must carry prominent notices stating that it is released under this License.  
+c) You must license the entire work, as a whole, under this License to anyone who comes into possession of a copy. This License will therefore apply, along with any applicable section 6 additional terms, to the whole of the work, and all its parts, regardless of how they are packaged.  
+d) If the work has interactive user interfaces, each must display Appropriate Legal Notices; however, if the Program has interactive interfaces that do not display Appropriate Legal Notices, your work need not make them do so.  
+**4\. Conveying Non-Source Forms.**
+
+You may convey a covered work in object code form under the terms of sections 2 and 3, provided that you also convey the machine-readable Corresponding Source under the terms of this License.
+
+**5\. Termination.**
+
+You may not propagate or modify a covered work except as expressly provided under this License. Any attempt otherwise to propagate or modify it is void, and will automatically terminate your rights under this License.
+
+Specifically, any act of **Commercial Use** of the Program or a covered work by you will automatically terminate your rights under this License.
+
+However, if you cease all violation of this License, and specifically all Commercial Use, then your license from a particular copyright holder is reinstated (a) provisionally, unless and until the copyright holder explicitly and finally terminates your license, and (b) permanently, if the copyright holder fails to notify you of the violation by some reasonable means within 60 days after the cessation.
+
+**6\. Additional Terms.**
+
+"Additional permissions" are terms that supplement the terms of this License by making exceptions from one or more of its conditions. You may not add any term that purports to allow **Commercial Use** of the Program or a covered work.
+
+**7\. No Sublicensing.**
+
+This License is not a sublicense. If another license gives you permission to make a "derivative work," that does not grant you permission to use this Program or works based on it for Commercial Use.
+
+**8\. Patents.**
+
+A "contributor" is a copyright holder who authorizes use under this License of the Program or a work on which the Program is based. The work thus licensed is called the contributor's "contributor version."
+
+Each contributor grants you a non-exclusive, worldwide, royalty-free patent license under the contributor's essential patent claims, to make, use, sell, offer for sale, import and otherwise run, modify and propagate the contents of its contributor version, but **only for Non-Commercial Use**.
+
+**9\. Disclaimer of Warranty.**
+
+THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY APPLICABLE LAW. EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES PROVIDE THE PROGRAM "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM IS WITH YOU. SHOULD THE PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING, REPAIR OR CORRECTION.
+
+**10\. Limitation of Liability.**
+
+IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MODIFIES AND/OR CONVEYS THE PROGRAM AS PERMITTED ABOVE, BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY GENERAL, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OR INABILITY TO USE THE PROGRAM (INCLUDING BUT NOT LIMITED TO LOSS OF DATA OR DATA BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD PARTIES OR A FAILURE OF THE PROGRAM TO OPERATE WITH ANY OTHER PROGRAMS), EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+
+**How to Apply These Terms to Your New Programs**
+
+If you develop a new program, and you want it to be of the greatest possible use to the non-commercial community, the best way to achieve this is to make it free software which everyone can redistribute and change under these terms.
+
+To do so, attach the following notices to the program. It is safest to attach them to the start of each source file to most effectively state the exclusion of warranty; and each file should have at least the "copyright" line and a pointer to where the full notice is found.
+
+\<one line to give the program's name and a brief idea of what it does.\>  
+Copyright (C)  
+This program is free software for non-commercial use; you can redistribute it and/or modify it under the terms of the Non-Commercial General Public License as published by its authors, either version 1 of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful for non-commercial purposes, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the Non-Commercial General Public License for more details.
+
+You should have received a copy of the Non-Commercial General Public License along with this program. If not, see [https://URL-where-you-host-this-license-text.com/](https://URL-where-you-host-this-license-text.com/).
