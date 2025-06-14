@@ -91,7 +91,10 @@ const ProfileScreen: React.FC = () => {
       </View>
       
       {/* Stats card */}
-      <Card style={[styles.statsCard, { backgroundColor: theme.colors.surface }]}>
+      <Card style={[styles.statsCard, { 
+          backgroundColor: theme.colors.cardBackground,
+          borderRadius: theme.roundness * 3
+        }]}>
         <Card.Content>
           <Text variant="titleLarge" style={{ color: theme.colors.text }}>Your Stats</Text>
           
@@ -157,7 +160,10 @@ const ProfileScreen: React.FC = () => {
       </Button>
       
       {/* Settings */}
-      <Card style={[styles.settingsCard, { backgroundColor: theme.colors.surface }]}>
+      <Card style={[styles.settingsCard, {
+          backgroundColor: theme.colors.cardBackground,
+          borderRadius: theme.roundness * 3
+      }]}>
         <Card.Content>
           <Text variant="titleLarge" style={{ color: theme.colors.text }}>Settings</Text>
           
@@ -220,7 +226,7 @@ const ProfileScreen: React.FC = () => {
       </Card>
       
       {/* About section */}
-      <Card style={[styles.aboutCard, { backgroundColor: theme.colors.surface }]}>
+      <Card style={[styles.aboutCard, { backgroundColor: theme.colors.cardBackground }]}>
         <Card.Content>
           <Text variant="titleLarge" style={{ color: theme.colors.text }}>About</Text>
           

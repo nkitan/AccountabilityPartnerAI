@@ -165,7 +165,7 @@ const HabitsScreen: React.FC = () => {
         style={[
           styles.habitCard, 
           { 
-            backgroundColor: theme.colors.surface,
+            backgroundColor: theme.colors.cardBackground,
             borderColor: theme.colors.outline,
             borderLeftColor: item.color || theme.colors.primary,
             borderLeftWidth: 5,

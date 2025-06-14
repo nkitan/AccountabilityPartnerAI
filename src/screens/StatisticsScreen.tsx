@@ -179,7 +179,7 @@ const StatisticsScreen: React.FC = () => {
         
         {/* Today's Progress Card */}
         <Surface style={[styles.progressCard, { 
-          backgroundColor: theme.colors.surface,
+          backgroundColor: theme.colors.cardBackground,
           borderRadius: theme.roundness * 3,
           elevation: 4,
           shadowColor: theme.colors.primary,
@@ -250,7 +250,7 @@ const StatisticsScreen: React.FC = () => {
         
         {/* Overview Stats Card */}
         <Surface style={[styles.overviewCard, { 
-          backgroundColor: theme.colors.surface,
+          backgroundColor: theme.colors.cardBackground,
           borderRadius: theme.roundness * 3,
           elevation: 3,
           marginTop: 16,
@@ -360,7 +360,7 @@ const StatisticsScreen: React.FC = () => {
         
         {/* Achievements Card */}
         <Card style={[styles.card, { 
-          backgroundColor: theme.colors.surface,
+          backgroundColor: theme.colors.cardBackground,
           borderRadius: theme.roundness * 2,
           elevation: 2
         }]}>
@@ -446,7 +446,7 @@ const StatisticsScreen: React.FC = () => {
         
         {/* Categories Distribution Card */}
         <Card style={[styles.card, { 
-          backgroundColor: theme.colors.surface,
+          backgroundColor: theme.colors.cardBackground,
           borderRadius: theme.roundness * 2,
           elevation: 2
         }]}>
@@ -682,7 +682,7 @@ const StatisticsScreen: React.FC = () => {
         
         {/* Priority Distribution Card */}
         <Card style={[styles.card, { 
-          backgroundColor: theme.colors.surface,
+          backgroundColor: theme.colors.cardBackground,
           borderRadius: theme.roundness * 2,
           elevation: 2
         }]}>
@@ -775,7 +775,7 @@ const StatisticsScreen: React.FC = () => {
                           )
                         };
                       })}
-                      barWidth={35}
+                      barWidth={25}
                       spacing={20}
                       roundedTop
                       hideRules
@@ -789,7 +789,7 @@ const StatisticsScreen: React.FC = () => {
                       height={200}
                       width={Math.max(300, Object.keys(priorityDistribution).length * 60)}
                       showGradient
-                      barBorderRadius={6}
+                      barBorderRadius={1}
                       disableScroll
                       barMarginBottom={20}
                       showYAxisIndices={false}
@@ -937,7 +937,7 @@ const StatisticsScreen: React.FC = () => {
         
         {/* Weekly Progress Card */}
         <Card style={[styles.card, { 
-          backgroundColor: theme.colors.surface,
+          backgroundColor: theme.colors.cardBackground,
           borderRadius: theme.roundness * 2,
           elevation: 2,
           marginBottom: 24
